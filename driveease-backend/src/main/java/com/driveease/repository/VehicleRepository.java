@@ -1,6 +1,7 @@
 package com.driveease.repository;
 
 import com.driveease.enums.AvailabilityStatus;
+import com.driveease.enums.BookingStatus;
 import com.driveease.enums.ContractStatus;
 import com.driveease.enums.VehicleType;
 import com.driveease.model.Vehicle;
@@ -21,12 +22,21 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
           AND c.status = :contractStatus
           AND c.effectiveFrom <= :pickupDate
           AND (c.effectiveTo IS NULL OR c.effectiveTo >= :returnDate)
+          AND NOT EXISTS (
+              SELECT bv FROM BookingVehicle bv
+              JOIN bv.booking b
+              WHERE bv.vehicle = v
+                AND b.status IN :bookedStatuses
+                AND b.pickupDate < :returnDate
+                AND b.returnDate > :pickupDate
+          )
     """)
     List<Vehicle> searchAvailableVehicles(
             VehicleType vehicleType,
             AvailabilityStatus availabilityStatus,
             ContractStatus contractStatus,
             LocalDate pickupDate,
-            LocalDate returnDate
+            LocalDate returnDate,
+            List<BookingStatus> bookedStatuses
     );
 }
