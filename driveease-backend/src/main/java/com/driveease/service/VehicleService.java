@@ -5,6 +5,7 @@ import com.driveease.dto.VehicleResponse;
 import com.driveease.dto.VehicleSearchRequest;
 import com.driveease.dto.VehicleSearchResponse;
 import com.driveease.enums.AvailabilityStatus;
+import com.driveease.enums.BookingStatus;
 import com.driveease.enums.ContractStatus;
 import com.driveease.model.Contract;
 import com.driveease.model.Vehicle;
@@ -105,7 +106,8 @@ public class VehicleService {
                 AvailabilityStatus.AVAILABLE,
                 ContractStatus.ACTIVE,
                 request.getPickupDate(),
-                returnDate
+                returnDate,
+                List.of(BookingStatus.CONFIRMED)
         );
 
         return vehicles.stream()
