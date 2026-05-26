@@ -4,6 +4,7 @@ import com.driveease.dto.ProviderRequest;
 import com.driveease.model.Provider;
 import com.driveease.service.ProviderService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ProviderController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public Provider createProvider(@Valid @RequestBody ProviderRequest request) {
         return providerService.createProvider(request);
     }
@@ -35,6 +37,7 @@ public class ProviderController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public Provider updateProvider(
             @PathVariable Long id,
             @Valid @RequestBody ProviderRequest request
@@ -43,6 +46,7 @@ public class ProviderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public String deactivateProvider(@PathVariable Long id) {
         providerService.deactivateProvider(id);
         return "Provider deactivated successfully";

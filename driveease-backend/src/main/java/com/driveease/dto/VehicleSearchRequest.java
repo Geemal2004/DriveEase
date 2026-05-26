@@ -23,6 +23,5 @@ public class VehicleSearchRequest {
     @Positive(message = "Number of vehicles must be greater than zero")
     private Integer numberOfVehicles;
 
-    @NotNull(message = "Vehicle type is required")
-    private VehicleType vehicleType;
+    private VehicleType vehicleType; // Optional: if null, search all types
 }

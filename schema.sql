@@ -63,6 +63,7 @@ CREATE TABLE vehicle (
     vehicle_type ENUM('SUV', 'SEDAN', 'HATCHBACK', 'VAN', 'OTHER') NOT NULL,
     registration_no VARCHAR(50) NOT NULL UNIQUE,
     model VARCHAR(100),
+    image_url VARCHAR(500),
     base_daily_rate DECIMAL(10,2) NOT NULL,
     allowed_mileage_per_day INT,
     availability_status ENUM('AVAILABLE', 'NOT_AVAILABLE', 'MAINTENANCE') DEFAULT 'AVAILABLE',

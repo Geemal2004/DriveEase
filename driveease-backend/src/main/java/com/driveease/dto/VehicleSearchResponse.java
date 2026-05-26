@@ -16,6 +16,7 @@ public class VehicleSearchResponse {
     private VehicleType vehicleType;
     private String registrationNo;
     private String model;
+    private String imageUrl;
     private BigDecimal baseDailyRate;
     private BigDecimal finalDailyRate;
     private Integer rentalDays;

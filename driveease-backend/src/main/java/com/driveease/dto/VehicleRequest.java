@@ -25,6 +25,8 @@ public class VehicleRequest {
 
     private String model;
 
+    private String imageUrl;
+
     @NotNull(message = "Base daily rate is required")
     @Positive(message = "Base daily rate must be greater than zero")
     private BigDecimal baseDailyRate;

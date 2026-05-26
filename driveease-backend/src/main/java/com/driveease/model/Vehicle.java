@@ -33,6 +33,9 @@ public class Vehicle {
 
     private String model;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @Column(nullable = false)
     private BigDecimal baseDailyRate;
 

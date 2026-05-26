@@ -30,8 +30,7 @@ public class BookingService {
             BookingVehicleRepository bookingVehicleRepository,
             CustomerRepository customerRepository,
             AppUserRepository appUserRepository,
-            VehicleRepository vehicleRepository
-    ) {
+            VehicleRepository vehicleRepository) {
         this.bookingRepository = bookingRepository;
         this.bookingVehicleRepository = bookingVehicleRepository;
         this.customerRepository = customerRepository;
@@ -94,8 +93,8 @@ public class BookingService {
         savedBooking.setTotalAmount(totalAmount);
         Booking finalBooking = bookingRepository.save(savedBooking);
 
-        List<BookingVehicle> bookingVehicles =
-                bookingVehicleRepository.findByBookingBookingId(finalBooking.getBookingId());
+        List<BookingVehicle> bookingVehicles = bookingVehicleRepository
+                .findByBookingBookingId(finalBooking.getBookingId());
 
         return BookingResponse.fromEntity(finalBooking, bookingVehicles);
     }
@@ -104,8 +103,8 @@ public class BookingService {
         return bookingRepository.findAll()
                 .stream()
                 .map(booking -> {
-                    List<BookingVehicle> bookingVehicles =
-                            bookingVehicleRepository.findByBookingBookingId(booking.getBookingId());
+                    List<BookingVehicle> bookingVehicles = bookingVehicleRepository
+                            .findByBookingBookingId(booking.getBookingId());
 
                     return BookingResponse.fromEntity(booking, bookingVehicles);
                 })
@@ -115,8 +114,7 @@ public class BookingService {
     public BookingResponse getBookingById(Long id) {
         Booking booking = getBookingEntityById(id);
 
-        List<BookingVehicle> bookingVehicles =
-                bookingVehicleRepository.findByBookingBookingId(id);
+        List<BookingVehicle> bookingVehicles = bookingVehicleRepository.findByBookingBookingId(id);
 
         return BookingResponse.fromEntity(booking, bookingVehicles);
     }
@@ -127,8 +125,7 @@ public class BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
 
-        List<BookingVehicle> bookingVehicles =
-                bookingVehicleRepository.findByBookingBookingId(id);
+        List<BookingVehicle> bookingVehicles = bookingVehicleRepository.findByBookingBookingId(id);
 
         return BookingResponse.fromEntity(updatedBooking, bookingVehicles);
     }
@@ -139,8 +136,7 @@ public class BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
 
-        List<BookingVehicle> bookingVehicles =
-                bookingVehicleRepository.findByBookingBookingId(id);
+        List<BookingVehicle> bookingVehicles = bookingVehicleRepository.findByBookingBookingId(id);
 
         return BookingResponse.fromEntity(updatedBooking, bookingVehicles);
     }

@@ -39,8 +39,7 @@ public class VehicleController {
     @PutMapping("/{id}")
     public VehicleResponse updateVehicle(
             @PathVariable Long id,
-            @Valid @RequestBody VehicleRequest request
-    ) {
+            @Valid @RequestBody VehicleRequest request) {
         return vehicleService.updateVehicle(id, request);
     }
 
@@ -52,8 +51,7 @@ public class VehicleController {
 
     @PostMapping("/search")
     public List<VehicleSearchResponse> searchVehicles(
-            @Valid @RequestBody VehicleSearchRequest request
-    ) {
+            @Valid @RequestBody VehicleSearchRequest request) {
         return vehicleService.searchVehicles(request);
     }
 }

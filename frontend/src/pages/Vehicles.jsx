@@ -1,0 +1,477 @@
+import { useEffect, useState } from "react";
+import {
+  getAllVehicles,
+  createVehicle,
+  updateVehicle,
+  deactivateVehicle,
+  uploadVehicleImage,
+} from "../services/vehicleService";
+import { getAllContracts } from "../services/contractService";
+import EmptyState from "../components/EmptyState";
+import SegmentedTabs from "../components/SegmentedTabs";
+import SkeletonRows from "../components/SkeletonRows";
+
+function Vehicles() {
+  const [vehicles, setVehicles] = useState([]);
+  const [contracts, setContracts] = useState([]);
+  const [editingVehicleId, setEditingVehicleId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("list");
+
+  const [formData, setFormData] = useState({
+    contractId: "",
+    vehicleType: "SUV",
+    registrationNo: "",
+    model: "",
+    imageUrl: "",
+    baseDailyRate: "",
+    allowedMileagePerDay: "",
+    availabilityStatus: "AVAILABLE",
+    active: true,
+  });
+
+  const loadVehicles = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAllVehicles();
+      setVehicles(data);
+    } catch {
+      setError("Failed to load vehicles.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadContracts = async () => {
+    try {
+      const data = await getAllContracts();
+      setContracts(data.filter((contract) => contract.status === "ACTIVE"));
+    } catch {
+      setError("Failed to load contracts.");
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : name === "contractId" ||
+            name === "baseDailyRate" ||
+            name === "allowedMileagePerDay"
+          ? Number(value)
+          : value,
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      contractId: "",
+      vehicleType: "SUV",
+      registrationNo: "",
+      model: "",
+      imageUrl: "",
+      baseDailyRate: "",
+      allowedMileagePerDay: "",
+      availabilityStatus: "AVAILABLE",
+      active: true,
+    });
+
+    setEditingVehicleId(null);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+    setIsUploadingImage(true);
+
+    try {
+      const response = await uploadVehicleImage(file);
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: response.imageUrl,
+      }));
+      setMessage("Vehicle image uploaded successfully.");
+    } catch (err) {
+      const backendMessage = err.response?.data?.message;
+      setError(backendMessage || "Failed to upload image.");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setError("");
+
+    const payload = {
+      ...formData,
+      contractId: Number(formData.contractId),
+      baseDailyRate: Number(formData.baseDailyRate),
+      allowedMileagePerDay: formData.allowedMileagePerDay
+        ? Number(formData.allowedMileagePerDay)
+        : null,
+    };
+
+    try {
+      if (editingVehicleId) {
+        await updateVehicle(editingVehicleId, payload);
+        setMessage("Vehicle updated successfully.");
+      } else {
+        await createVehicle(payload);
+        setMessage("Vehicle created successfully.");
+      }
+
+      resetForm();
+      setActiveTab("list");
+      void loadVehicles();
+    } catch (err) {
+      const backendMessage = err.response?.data?.message;
+      setError(backendMessage || "Failed to save vehicle.");
+    }
+  };
+
+  const handleEdit = (vehicle) => {
+    setEditingVehicleId(vehicle.vehicleId);
+
+    setFormData({
+      contractId: vehicle.contractId || "",
+      vehicleType: vehicle.vehicleType || "SUV",
+      registrationNo: vehicle.registrationNo || "",
+      model: vehicle.model || "",
+      imageUrl: vehicle.imageUrl || "",
+      baseDailyRate: vehicle.baseDailyRate || "",
+      allowedMileagePerDay: vehicle.allowedMileagePerDay || "",
+      availabilityStatus: vehicle.availabilityStatus || "AVAILABLE",
+      active: vehicle.active ?? true,
+    });
+  };
+
+  const handleDeactivate = async (id) => {
+    const confirmDeactivate = window.confirm(
+      "Are you sure you want to deactivate this vehicle?"
+    );
+
+    if (!confirmDeactivate) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+
+    try {
+      await deactivateVehicle(id);
+      setMessage("Vehicle deactivated successfully.");
+      
+      // Update local state without needing API call or ensure the loadVehicles works properly. 
+      // If we deactivate it, it remains in the list as inactive, so we should update its status in state or just reload.
+      void loadVehicles();
+    } catch {
+      setError("Failed to deactivate vehicle.");
+    }
+  };
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      void loadVehicles();
+      void loadContracts();
+    });
+  }, []);
+
+  return (
+    <div>
+      <div className="sticky-page-header">
+        <div className="page-header">
+          <div>
+            <h1>Vehicles</h1>
+            <p>Central inventory for contract-linked vehicles, status, pricing, and imagery.</p>
+          </div>
+          <SegmentedTabs
+            tabs={[
+              { key: "list", label: "Vehicle List" },
+              { key: "manage", label: editingVehicleId ? "Update Vehicle" : "Add Vehicle" },
+            ]}
+            activeKey={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
+      </div>
+
+      {message && <div className="success-message">{message}</div>}
+      {error && <div className="error-message">{error}</div>}
+
+      <div
+        className="content-grid"
+        style={{
+          gridTemplateColumns:
+            activeTab === "manage"
+              ? "minmax(360px, 460px) minmax(0, 1fr)"
+              : "minmax(0, 1fr)",
+        }}
+      >
+        {activeTab === "manage" && (
+          <div className="form-card">
+          <h2>{editingVehicleId ? "Update Vehicle" : "Add Vehicle"}</h2>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Contract</label>
+              <select
+                name="contractId"
+                value={formData.contractId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Contract</option>
+                {contracts.map((contract) => (
+                  <option key={contract.contractId} value={contract.contractId}>
+                    {contract.documentName} - {contract.providerName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Vehicle Type</label>
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleChange}
+              >
+                <option value="SUV">SUV</option>
+                <option value="SEDAN">SEDAN</option>
+                <option value="HATCHBACK">HATCHBACK</option>
+                <option value="VAN">VAN</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Registration Number</label>
+              <input
+                type="text"
+                name="registrationNo"
+                value={formData.registrationNo}
+                onChange={handleChange}
+                placeholder="Example: CAB-1234"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Model</label>
+              <input
+                type="text"
+                name="model"
+                value={formData.model}
+                onChange={handleChange}
+                placeholder="Example: Toyota CHR"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Vehicle Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isUploadingImage}
+              />
+              {isUploadingImage && <p className="muted-text">Uploading image...</p>}
+              {formData.imageUrl && (
+                <img
+                  src={formData.imageUrl}
+                  alt="Vehicle preview"
+                  style={{
+                    marginTop: "10px",
+                    width: "140px",
+                    height: "90px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    border: "1px solid #d1d5db",
+                  }}
+                />
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Base Daily Rate</label>
+              <input
+                type="number"
+                name="baseDailyRate"
+                value={formData.baseDailyRate}
+                onChange={handleChange}
+                placeholder="Example: 10000"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Allowed Mileage Per Day</label>
+              <input
+                type="number"
+                name="allowedMileagePerDay"
+                value={formData.allowedMileagePerDay}
+                onChange={handleChange}
+                placeholder="Example: 100"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Availability Status</label>
+              <select
+                name="availabilityStatus"
+                value={formData.availabilityStatus}
+                onChange={handleChange}
+              >
+                <option value="AVAILABLE">AVAILABLE</option>
+                <option value="NOT_AVAILABLE">NOT_AVAILABLE</option>
+                <option value="MAINTENANCE">MAINTENANCE</option>
+              </select>
+            </div>
+
+            <div className="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="active"
+                  checked={formData.active}
+                  onChange={handleChange}
+                />
+                Active Vehicle
+              </label>
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="primary-button">
+                {editingVehicleId ? "Update Vehicle" : "Add Vehicle"}
+              </button>
+
+              {editingVehicleId && (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={resetForm}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+        )}
+
+        <div className="table-card">
+          <h2>Vehicle List</h2>
+
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Provider</th>
+                <th>Type</th>
+                <th>Reg No</th>
+                <th>Model</th>
+                <th>Base Rate</th>
+                <th>Mileage</th>
+                <th>Status</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {isLoading ? (
+                <SkeletonRows rows={6} columns={11} />
+              ) : vehicles.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="empty-table">
+                    <EmptyState
+                      title="No Vehicles Yet"
+                      description="Add vehicles to make inventory searchable for booking."
+                    />
+                  </td>
+                </tr>
+              ) : (
+                vehicles.map((vehicle) => (
+                  <tr key={vehicle.vehicleId}>
+                    <td>{vehicle.vehicleId}</td>
+                    <td>
+                      {vehicle.imageUrl ? (
+                        <img
+                          src={vehicle.imageUrl}
+                          alt={vehicle.model || vehicle.registrationNo}
+                          style={{
+                            width: "72px",
+                            height: "48px",
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                            border: "1px solid #d1d5db",
+                          }}
+                        />
+                      ) : (
+                        <span className="muted-text">No image</span>
+                      )}
+                    </td>
+                    <td>{vehicle.providerName}</td>
+                    <td>{vehicle.vehicleType}</td>
+                    <td>{vehicle.registrationNo}</td>
+                    <td>{vehicle.model}</td>
+                    <td>Rs. {Number(vehicle.baseDailyRate).toFixed(2)}</td>
+                    <td>{vehicle.allowedMileagePerDay || "N/A"}</td>
+                    <td>
+                      <span
+                        className={
+                          vehicle.availabilityStatus === "AVAILABLE"
+                            ? "status-active"
+                            : "status-inactive"
+                        }
+                      >
+                        {vehicle.availabilityStatus}
+                      </span>
+                    </td>
+                    <td>{vehicle.active ? "Yes" : "No"}</td>
+                    <td>
+                      <button
+                        className="small-button"
+                        onClick={() => {
+                          handleEdit(vehicle);
+                          setActiveTab("manage");
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="danger-button"
+                        onClick={() => handleDeactivate(vehicle.vehicleId)}
+                      >
+                        Deactivate
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Vehicles;

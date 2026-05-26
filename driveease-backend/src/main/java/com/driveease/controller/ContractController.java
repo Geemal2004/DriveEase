@@ -4,6 +4,7 @@ import com.driveease.dto.ContractRequest;
 import com.driveease.dto.ContractResponse;
 import com.driveease.service.ContractService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ContractController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ContractResponse createContract(@Valid @RequestBody ContractRequest request) {
         return contractService.createContract(request);
     }
@@ -35,14 +37,15 @@ public class ContractController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ContractResponse updateContract(
             @PathVariable Long id,
-            @Valid @RequestBody ContractRequest request
-    ) {
+            @Valid @RequestBody ContractRequest request) {
         return contractService.updateContract(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public String removeContract(@PathVariable Long id) {
         contractService.removeContract(id);
         return "Contract removed successfully";
