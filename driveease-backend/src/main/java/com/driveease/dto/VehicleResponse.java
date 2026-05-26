@@ -19,6 +19,7 @@ public class VehicleResponse {
     private VehicleType vehicleType;
     private String registrationNo;
     private String model;
+    private String imageUrl;
     private BigDecimal baseDailyRate;
     private Integer allowedMileagePerDay;
     private AvailabilityStatus availabilityStatus;
@@ -33,6 +34,7 @@ public class VehicleResponse {
                 .vehicleType(vehicle.getVehicleType())
                 .registrationNo(vehicle.getRegistrationNo())
                 .model(vehicle.getModel())
+                .imageUrl(vehicle.getImageUrl())
                 .baseDailyRate(vehicle.getBaseDailyRate())
                 .allowedMileagePerDay(vehicle.getAllowedMileagePerDay())
                 .availabilityStatus(vehicle.getAvailabilityStatus())

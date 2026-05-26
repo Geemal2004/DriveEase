@@ -14,29 +14,28 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     @Query("""
-        SELECT v FROM Vehicle v
-        JOIN v.contract c
-        WHERE v.vehicleType = :vehicleType
-          AND v.availabilityStatus = :availabilityStatus
-          AND v.active = true
-          AND c.status = :contractStatus
-          AND c.effectiveFrom <= :pickupDate
-          AND (c.effectiveTo IS NULL OR c.effectiveTo >= :returnDate)
-          AND NOT EXISTS (
-              SELECT bv FROM BookingVehicle bv
-              JOIN bv.booking b
-              WHERE bv.vehicle = v
-                AND b.status IN :bookedStatuses
-                AND b.pickupDate < :returnDate
-                AND b.returnDate > :pickupDate
-          )
-    """)
+                SELECT v FROM Vehicle v
+                JOIN v.contract c
+                WHERE (:vehicleType IS NULL OR v.vehicleType = :vehicleType)
+                  AND v.availabilityStatus = :availabilityStatus
+                  AND v.active = true
+                  AND c.status = :contractStatus
+                  AND c.effectiveFrom <= :pickupDate
+                  AND (c.effectiveTo IS NULL OR c.effectiveTo >= :returnDate)
+                  AND NOT EXISTS (
+                      SELECT bv FROM BookingVehicle bv
+                      JOIN bv.booking b
+                      WHERE bv.vehicle = v
+                        AND b.status IN :bookedStatuses
+                        AND b.pickupDate < :returnDate
+                        AND b.returnDate > :pickupDate
+                  )
+            """)
     List<Vehicle> searchAvailableVehicles(
             VehicleType vehicleType,
             AvailabilityStatus availabilityStatus,
             ContractStatus contractStatus,
             LocalDate pickupDate,
             LocalDate returnDate,
-            List<BookingStatus> bookedStatuses
-    );
+            List<BookingStatus> bookedStatuses);
 }

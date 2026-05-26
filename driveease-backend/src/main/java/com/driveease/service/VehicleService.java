@@ -28,8 +28,7 @@ public class VehicleService {
 
     public VehicleService(
             VehicleRepository vehicleRepository,
-            ContractRepository contractRepository
-    ) {
+            ContractRepository contractRepository) {
         this.vehicleRepository = vehicleRepository;
         this.contractRepository = contractRepository;
     }
@@ -43,6 +42,7 @@ public class VehicleService {
                 .vehicleType(request.getVehicleType())
                 .registrationNo(request.getRegistrationNo())
                 .model(request.getModel())
+                .imageUrl(request.getImageUrl())
                 .baseDailyRate(request.getBaseDailyRate())
                 .allowedMileagePerDay(request.getAllowedMileagePerDay())
                 .availabilityStatus(request.getAvailabilityStatus() != null
@@ -77,6 +77,7 @@ public class VehicleService {
         vehicle.setVehicleType(request.getVehicleType());
         vehicle.setRegistrationNo(request.getRegistrationNo());
         vehicle.setModel(request.getModel());
+        vehicle.setImageUrl(request.getImageUrl());
         vehicle.setBaseDailyRate(request.getBaseDailyRate());
         vehicle.setAllowedMileagePerDay(request.getAllowedMileagePerDay());
 
@@ -95,6 +96,7 @@ public class VehicleService {
     public void deactivateVehicle(Long id) {
         Vehicle vehicle = getVehicleEntityById(id);
         vehicle.setActive(false);
+        vehicle.setAvailabilityStatus(AvailabilityStatus.NOT_AVAILABLE);
         vehicleRepository.save(vehicle);
     }
 
@@ -107,19 +109,16 @@ public class VehicleService {
                 ContractStatus.ACTIVE,
                 request.getPickupDate(),
                 returnDate,
-                List.of(BookingStatus.CONFIRMED)
-        );
+                List.of(BookingStatus.CONFIRMED));
 
         return vehicles.stream()
-                .limit(request.getNumberOfVehicles())
                 .map(vehicle -> mapToSearchResponse(vehicle, request))
                 .toList();
     }
 
     private VehicleSearchResponse mapToSearchResponse(
             Vehicle vehicle,
-            VehicleSearchRequest request
-    ) {
+            VehicleSearchRequest request) {
         BigDecimal finalDailyRate = vehicle.getBaseDailyRate()
                 .multiply(MARKUP_MULTIPLIER)
                 .setScale(2, RoundingMode.HALF_UP);
@@ -135,6 +134,7 @@ public class VehicleService {
                 .vehicleType(vehicle.getVehicleType())
                 .registrationNo(vehicle.getRegistrationNo())
                 .model(vehicle.getModel())
+                .imageUrl(vehicle.getImageUrl())
                 .baseDailyRate(vehicle.getBaseDailyRate())
                 .finalDailyRate(finalDailyRate)
                 .rentalDays(request.getRentalDays())

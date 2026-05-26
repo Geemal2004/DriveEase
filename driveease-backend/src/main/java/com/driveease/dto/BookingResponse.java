@@ -31,8 +31,7 @@ public class BookingResponse {
 
     public static BookingResponse fromEntity(
             Booking booking,
-            List<BookingVehicle> bookingVehicles
-    ) {
+            List<BookingVehicle> bookingVehicles) {
         return BookingResponse.builder()
                 .bookingId(booking.getBookingId())
                 .customerId(booking.getCustomer().getCustomerId())
@@ -49,8 +48,7 @@ public class BookingResponse {
                 .vehicles(
                         bookingVehicles.stream()
                                 .map(BookingVehicleResponse::fromEntity)
-                                .toList()
-                )
+                                .toList())
                 .build();
     }
 }
