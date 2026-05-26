@@ -374,66 +374,38 @@ function Vehicles() {
         </div>
         )}
 
-        <div className="table-card">
-          <h2>Vehicle List</h2>
+        <div className="table-card" style={{ background: "transparent", border: "none", boxShadow: "none", padding: 0, borderRadius: 0 }}>
+          <h2 style={{ marginBottom: "20px" }}>Vehicle List</h2>
 
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Image</th>
-                <th>Provider</th>
-                <th>Type</th>
-                <th>Reg No</th>
-                <th>Model</th>
-                <th>Base Rate</th>
-                <th>Mileage</th>
-                <th>Status</th>
-                <th>Active</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {isLoading ? (
-                <SkeletonRows rows={6} columns={11} />
-              ) : vehicles.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="empty-table">
-                    <EmptyState
-                      title="No Vehicles Yet"
-                      description="Add vehicles to make inventory searchable for booking."
+          {isLoading ? (
+            <SkeletonRows rows={6} columns={11} />
+          ) : vehicles.length === 0 ? (
+            <div className="empty-table" style={{ background: "var(--bg-elevated)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border-subtle)" }}>
+              <EmptyState
+                title="No Vehicles Yet"
+                description="Add vehicles to make inventory searchable for booking."
+              />
+            </div>
+          ) : (
+            <div className="cards-grid">
+              {vehicles.map((vehicle) => (
+                <div key={vehicle.vehicleId} className="vehicle-card">
+                  {vehicle.imageUrl ? (
+                    <img
+                      className="vehicle-card-img"
+                      src={vehicle.imageUrl}
+                      alt={vehicle.model || vehicle.registrationNo}
                     />
-                  </td>
-                </tr>
-              ) : (
-                vehicles.map((vehicle) => (
-                  <tr key={vehicle.vehicleId}>
-                    <td>{vehicle.vehicleId}</td>
-                    <td>
-                      {vehicle.imageUrl ? (
-                        <img
-                          src={vehicle.imageUrl}
-                          alt={vehicle.model || vehicle.registrationNo}
-                          style={{
-                            width: "72px",
-                            height: "48px",
-                            objectFit: "cover",
-                            borderRadius: "6px",
-                            border: "1px solid #d1d5db",
-                          }}
-                        />
-                      ) : (
-                        <span className="muted-text">No image</span>
-                      )}
-                    </td>
-                    <td>{vehicle.providerName}</td>
-                    <td>{vehicle.vehicleType}</td>
-                    <td>{vehicle.registrationNo}</td>
-                    <td>{vehicle.model}</td>
-                    <td>Rs. {Number(vehicle.baseDailyRate).toFixed(2)}</td>
-                    <td>{vehicle.allowedMileagePerDay || "N/A"}</td>
-                    <td>
+                  ) : (
+                    <div className="vehicle-card-no-img">No Image Available</div>
+                  )}
+                  
+                  <div className="vehicle-card-content">
+                    <div className="vehicle-card-header">
+                      <div>
+                        <div className="vehicle-card-title">{vehicle.model || "Unknown Model"}</div>
+                        <div className="vehicle-card-subtitle">{vehicle.registrationNo} • {vehicle.vehicleType}</div>
+                      </div>
                       <span
                         className={
                           vehicle.availabilityStatus === "AVAILABLE"
@@ -443,9 +415,16 @@ function Vehicles() {
                       >
                         {vehicle.availabilityStatus}
                       </span>
-                    </td>
-                    <td>{vehicle.active ? "Yes" : "No"}</td>
-                    <td>
+                    </div>
+
+                    <div className="vehicle-card-details">
+                      <div><strong>Provider:</strong> {vehicle.providerName}</div>
+                      <div><strong>Base Rate:</strong> Rs. {Number(vehicle.baseDailyRate).toFixed(2)} / day</div>
+                      <div><strong>Mileage:</strong> {vehicle.allowedMileagePerDay || "N/A"}</div>
+                      <div><strong>Active:</strong> {vehicle.active ? "Yes" : "No"}</div>
+                    </div>
+
+                    <div className="vehicle-card-actions">
                       <button
                         className="small-button"
                         onClick={() => {
@@ -462,12 +441,12 @@ function Vehicles() {
                       >
                         Deactivate
                       </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

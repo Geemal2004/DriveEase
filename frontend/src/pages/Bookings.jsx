@@ -7,6 +7,7 @@ import {
 } from "../services/bookingService";
 import { getAllCustomers } from "../services/customerService";
 import { searchVehicles } from "../services/vehicleService";
+import authService from "../services/authService";
 import EmptyState from "../components/EmptyState";
 import SegmentedTabs from "../components/SegmentedTabs";
 import SkeletonRows from "../components/SkeletonRows";
@@ -26,7 +27,7 @@ function Bookings() {
 
   const [formData, setFormData] = useState({
     customerId: "",
-    createdByUserId: 1,
+    createdByUserId: authService.getCurrentUser()?.id || 1,
     pickupDate: "",
     rentalDays: 1,
     numberOfVehicles: 1,
@@ -153,7 +154,7 @@ function Bookings() {
 
       setFormData({
         customerId: "",
-        createdByUserId: 1,
+        createdByUserId: authService.getCurrentUser()?.id || 1,
         pickupDate: "",
         rentalDays: 1,
         numberOfVehicles: 1,

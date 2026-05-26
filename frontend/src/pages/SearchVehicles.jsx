@@ -140,60 +140,62 @@ function SearchVehicles() {
       {message && <div className="success-message">{message}</div>}
       {error && <div className="error-message">{error}</div>}
 
-      <div className="search-grid">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div className="form-card">
           <h2>Search Criteria</h2>
 
           <form onSubmit={handleSearch}>
-            <div className="form-group">
-              <label>Pickup Date</label>
-              <input
-                type="date"
-                name="pickupDate"
-                value={searchData.pickupDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <div className="four-col-grid">
+              <div className="form-group">
+                <label>Pickup Date</label>
+                <input
+                  type="date"
+                  name="pickupDate"
+                  value={searchData.pickupDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Number of Rental Days</label>
-              <input
-                type="number"
-                name="rentalDays"
-                min="1"
-                value={searchData.rentalDays}
-                onChange={handleChange}
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label>Number of Rental Days</label>
+                <input
+                  type="number"
+                  name="rentalDays"
+                  min="1"
+                  value={searchData.rentalDays}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Number of Vehicles Required</label>
-              <input
-                type="number"
-                name="numberOfVehicles"
-                min="1"
-                value={searchData.numberOfVehicles}
-                onChange={handleChange}
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label>Number of Vehicles Required</label>
+                <input
+                  type="number"
+                  name="numberOfVehicles"
+                  min="1"
+                  value={searchData.numberOfVehicles}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Vehicle Type <span>(Optional)</span></label>
-              <select
-                name="vehicleType"
-                value={searchData.vehicleType}
-                onChange={handleChange}
-              >
-                <option value="">Any Type (All Vehicles)</option>
-                <option value="SUV">SUV</option>
-                <option value="SEDAN">SEDAN</option>
-                <option value="HATCHBACK">HATCHBACK</option>
-                <option value="VAN">VAN</option>
-                <option value="OTHER">OTHER</option>
-              </select>
+              <div className="form-group">
+                <label>Vehicle Type <span>(Optional)</span></label>
+                <select
+                  name="vehicleType"
+                  value={searchData.vehicleType}
+                  onChange={handleChange}
+                >
+                  <option value="">Any Type (All Vehicles)</option>
+                  <option value="SUV">SUV</option>
+                  <option value="SEDAN">SEDAN</option>
+                  <option value="HATCHBACK">HATCHBACK</option>
+                  <option value="VAN">VAN</option>
+                  <option value="OTHER">OTHER</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-actions">

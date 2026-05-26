@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap");
 
 :root {
   --bg-base: #f6f8fb;
   --bg-elevated: #ffffff;
   --bg-muted: #eef2f7;
-  --bg-accent-soft: #e8f1ff;
+  --bg-accent-soft: rgba(92, 141, 197, 0.15);
 
   --text-primary: #111827;
   --text-secondary: #3f4a5f;
@@ -13,8 +13,8 @@
   --border-subtle: #dfe6f0;
   --border-strong: #c7d2e3;
 
-  --brand-600: #0f62fe;
-  --brand-700: #0a4ed0;
+  --brand-600: #5c8dc5;
+  --brand-700: #736f60;
   --success-bg: #e9f9ee;
   --success-fg: #175e2b;
   --danger-bg: #ffecee;
@@ -51,14 +51,14 @@ body,
 
 body {
   margin: 0;
-  font-family: "Manrope", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Sora", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.45;
   letter-spacing: 0;
   color: var(--text-primary);
   background:
-    radial-gradient(circle at 10% 8%, #dbe8ff 0%, transparent 28%),
-    radial-gradient(circle at 92% 96%, #dcefe5 0%, transparent 24%),
+    radial-gradient(circle at 10% 8%, #ad9e9066 0%, transparent 35%),
+    radial-gradient(circle at 92% 96%, #909eae55 0%, transparent 30%),
     var(--bg-base);
 }
 
@@ -91,7 +91,7 @@ p {
   margin-bottom: var(--space-6);
   font-size: 26px;
   font-weight: 800;
-  color: #0b2346;
+  color: #736f60;
 }
 
 .nav-menu {
@@ -121,7 +121,7 @@ p {
 .nav-link.active {
   color: var(--brand-700);
   background: var(--bg-accent-soft);
-  border-color: #c8dcff;
+  border-color: #909eae;
 }
 
 .sidebar-footer {
@@ -151,8 +151,11 @@ p {
   z-index: 20;
   backdrop-filter: blur(8px);
   background: rgba(246, 248, 251, 0.88);
-  padding: var(--space-2) 0 var(--space-4);
-  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  margin: calc(var(--space-6) * -1) calc(var(--space-7) * -1) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(92, 141, 197, 0.04);
 }
 
 .page-header {
@@ -163,14 +166,15 @@ p {
 }
 
 .page-header h1 {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
-  color: #0d1b33;
+  color: var(--brand-700);
+  line-height: 1.2;
 }
 
 .page-header p {
-  margin-top: var(--space-2);
-  font-size: 16px;
+  margin-top: var(--space-1);
+  font-size: 15px;
   color: var(--text-muted);
 }
 
@@ -207,6 +211,97 @@ p {
   padding: var(--space-6);
 }
 
+.form-card {
+  width: 100%;
+}
+
+.four-col-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4) var(--space-6);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.vehicle-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.vehicle-card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vehicle-card-no-img {
+  width: 100%;
+  height: 180px;
+  background: var(--bg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vehicle-card-content {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex-grow: 1;
+}
+
+.vehicle-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.vehicle-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b2740;
+  margin-bottom: var(--space-1);
+}
+
+.vehicle-card-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.vehicle-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.vehicle-card-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
 .table-card {
   overflow-x: auto;
 }
@@ -222,6 +317,11 @@ p {
 
 .form-group {
   margin-bottom: var(--space-4);
+  max-width: 100%;
+}
+
+.four-col-grid .form-group {
+  margin-bottom: 0;
 }
 
 .form-group label {
@@ -345,8 +445,7 @@ p {
 }
 
 .data-table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }

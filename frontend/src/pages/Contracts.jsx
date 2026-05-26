@@ -7,6 +7,7 @@ import {
   uploadContractDocument,
 } from "../services/contractService";
 import { getAllProviders } from "../services/providerService";
+import authService from "../services/authService";
 import EmptyState from "../components/EmptyState";
 import SegmentedTabs from "../components/SegmentedTabs";
 import SkeletonRows from "../components/SkeletonRows";
@@ -23,7 +24,7 @@ function Contracts() {
 
   const [formData, setFormData] = useState({
     providerId: "",
-    uploadedByUserId: 1,
+    uploadedByUserId: authService.getCurrentUser()?.id || 1,
     documentName: "",
     documentUrl: "",
     effectiveFrom: "",
@@ -93,7 +94,7 @@ function Contracts() {
   const resetForm = () => {
     setFormData({
       providerId: "",
-      uploadedByUserId: 1,
+      uploadedByUserId: authService.getCurrentUser()?.id || 1,
       documentName: "",
       documentUrl: "",
       effectiveFrom: "",
@@ -144,7 +145,7 @@ function Contracts() {
 
     setFormData({
       providerId: contract.providerId || "",
-      uploadedByUserId: contract.uploadedByUserId || 1,
+      uploadedByUserId: contract.uploadedByUserId || authService.getCurrentUser()?.id || 1,
       documentName: contract.documentName || "",
       documentUrl: contract.documentUrl || "",
       effectiveFrom: contract.effectiveFrom || "",
@@ -235,17 +236,6 @@ function Contracts() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div className="form-group">
-              <label>Uploaded By User ID</label>
-              <input
-                type="number"
-                name="uploadedByUserId"
-                value={formData.uploadedByUserId}
-                onChange={handleChange}
-                required
-              />
             </div>
 
             <div className="form-group">
