@@ -419,8 +419,21 @@ function Vehicles() {
 
                     <div className="vehicle-card-details">
                       <div><strong>Provider:</strong> {vehicle.providerName}</div>
-                      <div><strong>Base Rate:</strong> Rs. {Number(vehicle.baseDailyRate).toFixed(2)} / day</div>
-                      <div><strong>Mileage:</strong> {vehicle.allowedMileagePerDay || "N/A"}</div>
+                      <div>
+                        <strong>Base Rate:</strong>{" "}
+                        <span className="numeric-value">
+                          Rs. {Number(vehicle.baseDailyRate).toFixed(2)}
+                        </span>{" "}
+                        / day
+                      </div>
+                      <div>
+                        <strong>Mileage:</strong>{" "}
+                        {vehicle.allowedMileagePerDay ? (
+                          <span className="numeric-value">{vehicle.allowedMileagePerDay}</span>
+                        ) : (
+                          "N/A"
+                        )}
+                      </div>
                       <div><strong>Active:</strong> {vehicle.active ? "Yes" : "No"}</div>
                     </div>
 

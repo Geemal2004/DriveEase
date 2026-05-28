@@ -131,9 +131,21 @@ function SearchVehicles() {
 
       <div className="print-report-header">
         <h2>DriveEase Vehicle Availability Report</h2>
-        <p>Pickup Date: {searchData.pickupDate || "N/A"}</p>
-        <p>Rental Days: {searchData.rentalDays}</p>
-        <p>Requested Vehicles: {searchData.numberOfVehicles}</p>
+        <p>
+          Pickup Date:{" "}
+          {searchData.pickupDate ? (
+            <span className="numeric-value">{searchData.pickupDate}</span>
+          ) : (
+            "N/A"
+          )}
+        </p>
+        <p>
+          Rental Days: <span className="numeric-value">{searchData.rentalDays}</span>
+        </p>
+        <p>
+          Requested Vehicles:{" "}
+          <span className="numeric-value">{searchData.numberOfVehicles}</span>
+        </p>
         <p>Vehicle Type: {searchData.vehicleType || "Any Type"}</p>
       </div>
 
@@ -303,11 +315,11 @@ function SearchVehicles() {
                     <td>{vehicle.providerName}</td>
                     <td>{vehicle.registrationNo}</td>
                     <td>{vehicle.model}</td>
-                    <td>Rs. {Number(vehicle.baseDailyRate).toFixed(2)}</td>
-                    <td>Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
-                    <td>{vehicle.rentalDays}</td>
+                    <td className="numeric-cell">Rs. {Number(vehicle.baseDailyRate).toFixed(2)}</td>
+                    <td className="numeric-cell">Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
+                    <td className="numeric-cell">{vehicle.rentalDays}</td>
                     <td>
-                      <strong>
+                      <strong className="numeric-value">
                         Rs. {Number(vehicle.totalPrice).toFixed(2)}
                       </strong>
                     </td>
@@ -327,11 +339,13 @@ function SearchVehicles() {
               <h3>Booking Simulation Summary</h3>
 
               <p>
-                <strong>Pickup Date:</strong> {simulation.pickupDate}
+                <strong>Pickup Date:</strong>{" "}
+                <span className="numeric-value">{simulation.pickupDate}</span>
               </p>
 
               <p>
-                <strong>Rental Days:</strong> {simulation.rentalDays}
+                <strong>Rental Days:</strong>{" "}
+                <span className="numeric-value">{simulation.rentalDays}</span>
               </p>
 
               <p>
@@ -339,12 +353,15 @@ function SearchVehicles() {
               </p>
 
               <p>
-                <strong>Vehicle Count:</strong> {simulation.vehicleCount}
+                <strong>Vehicle Count:</strong>{" "}
+                <span className="numeric-value">{simulation.vehicleCount}</span>
               </p>
 
               <p>
-                <strong>Total Estimated Price:</strong> Rs.{" "}
-                {simulation.totalAmount.toFixed(2)}
+                <strong>Total Estimated Price:</strong>{" "}
+                <span className="numeric-value">
+                  Rs. {simulation.totalAmount.toFixed(2)}
+                </span>
               </p>
 
               <p className="muted-text">

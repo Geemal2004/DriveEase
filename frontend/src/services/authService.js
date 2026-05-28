@@ -23,6 +23,11 @@ const registerUser = async (userData) => {
   return response.data;
 };
 
+const getAllUsers = async () => {
+  const response = await api.get("/admin/users");
+  return response.data;
+};
+
 const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
@@ -31,6 +36,7 @@ const authService = {
   login,
   logout,
   registerUser,
+  getAllUsers,
   getCurrentUser,
 };
 

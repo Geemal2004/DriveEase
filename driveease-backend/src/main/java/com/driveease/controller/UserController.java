@@ -2,6 +2,7 @@ package com.driveease.controller;
 
 import com.driveease.dto.auth.MessageResponse;
 import com.driveease.dto.auth.SignupRequest;
+import com.driveease.dto.UserResponse;
 import com.driveease.enums.AccountStatus;
 import com.driveease.enums.UserRole;
 import com.driveease.model.AppUser;
@@ -11,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Comparator;
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173", maxAge = 3600)
 @RestController
@@ -23,6 +27,15 @@ public class UserController {
     public UserController(AppUserRepository userRepository, PasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(AppUser::getUserId))
+                .map(UserResponse::fromEntity)
+                .toList();
     }
 
     @PostMapping("/register")
