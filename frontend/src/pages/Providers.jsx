@@ -282,10 +282,10 @@ function Providers() {
               ) : (
                 providers.map((provider) => (
                   <tr key={provider.providerId}>
-                    <td>{provider.providerId}</td>
+                    <td className="numeric-cell">{provider.providerId}</td>
                     <td>{provider.providerName}</td>
                     <td>{provider.contactPerson}</td>
-                    <td>{provider.phone}</td>
+                    <td className="numeric-cell">{provider.phone}</td>
                     <td>{provider.email}</td>
                     <td>
                       <span

@@ -341,10 +341,12 @@ function Bookings() {
             <div className="summary-box">
               <h3>Selected Booking Summary</h3>
               <p>
-                <strong>Selected Vehicles:</strong> {selectedVehicleIds.length}
+                <strong>Selected Vehicles:</strong>{" "}
+                <span className="numeric-value">{selectedVehicleIds.length}</span>
               </p>
               <p>
-                <strong>Total Amount:</strong> Rs. {selectedTotal.toFixed(2)}
+                <strong>Total Amount:</strong>{" "}
+                <span className="numeric-value">Rs. {selectedTotal.toFixed(2)}</span>
               </p>
 
               <button
@@ -400,9 +402,9 @@ function Bookings() {
                     <td>{vehicle.vehicleType}</td>
                     <td>{vehicle.registrationNo}</td>
                     <td>{vehicle.model}</td>
-                    <td>Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
+                    <td className="numeric-cell">Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
                     <td>
-                      <strong>
+                      <strong className="numeric-value">
                         Rs. {Number(vehicle.totalPrice).toFixed(2)}
                       </strong>
                     </td>
@@ -448,13 +450,13 @@ function Bookings() {
             ) : (
               bookings.map((booking) => (
                 <tr key={booking.bookingId}>
-                  <td>{booking.bookingId}</td>
+                  <td className="numeric-cell">{booking.bookingId}</td>
                   <td>{booking.customerName}</td>
-                  <td>{booking.pickupDate}</td>
-                  <td>{booking.returnDate}</td>
-                  <td>{booking.rentalDays}</td>
+                  <td className="numeric-cell">{booking.pickupDate}</td>
+                  <td className="numeric-cell">{booking.returnDate}</td>
+                  <td className="numeric-cell">{booking.rentalDays}</td>
                   <td>
-                    <strong>Rs. {Number(booking.totalAmount).toFixed(2)}</strong>
+                    <strong className="numeric-value">Rs. {Number(booking.totalAmount).toFixed(2)}</strong>
                   </td>
                   <td>
                     <span

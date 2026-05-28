@@ -357,7 +357,7 @@ function Contracts() {
               ) : (
                 contracts.map((contract) => (
                   <tr key={contract.contractId}>
-                    <td>{contract.contractId}</td>
+                    <td className="numeric-cell">{contract.contractId}</td>
                     <td>{contract.providerName}</td>
                     <td>
                       <strong>{contract.documentName}</strong>
@@ -376,8 +376,14 @@ function Contracts() {
                         <span className="muted-text">No document uploaded</span>
                       )}
                     </td>
-                    <td>{contract.effectiveFrom}</td>
-                    <td>{contract.effectiveTo || "N/A"}</td>
+                    <td className="numeric-cell">{contract.effectiveFrom}</td>
+                    <td>
+                      {contract.effectiveTo ? (
+                        <span className="numeric-value">{contract.effectiveTo}</span>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
                     <td>
                       <span
                         className={

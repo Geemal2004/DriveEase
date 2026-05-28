@@ -86,7 +86,7 @@ function Dashboard() {
       <div className="sticky-page-header">
         <div className="page-header">
           <div>
-            <h1>DriveEase Dashboard</h1>
+            <h1>Dashboard</h1>
             <p>Overview of vehicles, customers, contracts, and booking performance.</p>
           </div>
         </div>
@@ -116,7 +116,7 @@ function Dashboard() {
             ) : (
               <>
                 <h3>{item.label}</h3>
-                <p>{item.value}</p>
+                <p className="numeric-value">{item.value}</p>
               </>
             )}
           </div>
@@ -153,12 +153,12 @@ function Dashboard() {
             ) : (
               recentBookings.map((booking) => (
                 <tr key={booking.bookingId}>
-                  <td>{booking.bookingId}</td>
+                  <td className="numeric-cell">{booking.bookingId}</td>
                   <td>{booking.customerName}</td>
-                  <td>{booking.pickupDate}</td>
-                  <td>{booking.returnDate}</td>
+                  <td className="numeric-cell">{booking.pickupDate}</td>
+                  <td className="numeric-cell">{booking.returnDate}</td>
                   <td>
-                    <strong>Rs. {Number(booking.totalAmount).toFixed(2)}</strong>
+                    <strong className="numeric-value">Rs. {Number(booking.totalAmount).toFixed(2)}</strong>
                   </td>
                   <td>
                     <span

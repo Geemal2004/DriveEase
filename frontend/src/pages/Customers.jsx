@@ -263,12 +263,30 @@ function Customers() {
               ) : (
                 customers.map((customer) => (
                   <tr key={customer.customerId}>
-                    <td>{customer.customerId}</td>
+                    <td className="numeric-cell">{customer.customerId}</td>
                     <td>{customer.fullName}</td>
-                    <td>{customer.phone || "N/A"}</td>
+                    <td>
+                      {customer.phone ? (
+                        <span className="numeric-value">{customer.phone}</span>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
                     <td>{customer.email || "N/A"}</td>
-                    <td>{customer.nicOrPassport || "N/A"}</td>
-                    <td>{customer.drivingLicenseNo || "N/A"}</td>
+                    <td>
+                      {customer.nicOrPassport ? (
+                        <span className="numeric-value">{customer.nicOrPassport}</span>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
+                    <td>
+                      {customer.drivingLicenseNo ? (
+                        <span className="numeric-value">{customer.drivingLicenseNo}</span>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
                     <td>
                       <button
                         className="small-button"

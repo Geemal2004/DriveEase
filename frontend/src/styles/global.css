@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap");
 
 :root {
   --bg-base: #f6f8fb;
@@ -24,7 +24,7 @@
 
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 10px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -37,6 +37,9 @@
 
   --shadow-sm: 0 2px 10px rgba(15, 24, 40, 0.06);
   --shadow-md: 0 8px 24px rgba(15, 24, 40, 0.08);
+
+  --font-body: "Sora", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-numeric: "Inter", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -51,7 +54,7 @@ body,
 
 body {
   margin: 0;
-  font-family: "Sora", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.45;
   letter-spacing: 0;
@@ -60,6 +63,15 @@ body {
     radial-gradient(circle at 10% 8%, #ad9e9066 0%, transparent 35%),
     radial-gradient(circle at 92% 96%, #909eae55 0%, transparent 30%),
     var(--bg-base);
+}
+
+.numeric-value,
+.numeric-cell,
+input[type="date"],
+input[type="number"] {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 h1,
@@ -89,7 +101,7 @@ p {
 
 .logo {
   margin-bottom: var(--space-6);
-  font-size: 26px;
+  font-size: 40px;
   font-weight: 800;
   color: #736f60;
 }
@@ -138,6 +150,10 @@ p {
 
 .main-content {
   padding: var(--space-6) var(--space-7) var(--space-7);
+  background:
+    linear-gradient(rgba(246, 248, 251, 0.9), rgba(246, 248, 251, 0.9)),
+    url("/car-rental-companies-1-scaled-1.jpg") center / cover no-repeat;
+  background-attachment: fixed;
 }
 
 .workspace {
@@ -154,7 +170,7 @@ p {
   padding: var(--space-4) var(--space-5);
   margin: calc(var(--space-6) * -1) calc(var(--space-7) * -1) var(--space-6);
   border-bottom: 1px solid var(--border-subtle);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: 0px;
   box-shadow: 0 4px 16px rgba(92, 141, 197, 0.04);
 }
 
@@ -201,9 +217,10 @@ p {
 .panel-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: 0px;
   box-shadow: var(--shadow-sm);
 }
+
 
 .form-card,
 .table-card,
@@ -644,6 +661,9 @@ p {
 
 .stat-card p {
   font-size: 28px;
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
   font-weight: 800;
   color: #0f2240;
 }
@@ -673,11 +693,11 @@ p {
 }
 
 .tab-button:hover {
-  background: #eef2f8;
+  background: #dcd5b7;
 }
 
 .tab-button.active {
-  background: #fff;
+  background: #b6b09c;
   color: #1f3357;
   box-shadow: var(--shadow-sm);
 }
