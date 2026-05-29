@@ -647,7 +647,7 @@ p {
 
 .stat-card {
   padding: var(--space-5);
-  border-left: 4px solid #d9e6ff;
+ 
 }
 
 .stat-card h3 {
@@ -773,7 +773,7 @@ p {
   width: 100%;
   border: none;
   border-radius: 0px;
-  background: var(--brand-600);
+  background:#a39665;
   color: #fff;
   font-size: 15px;
   font-weight: 800;
