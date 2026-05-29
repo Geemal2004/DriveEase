@@ -743,6 +743,10 @@ p {
 }
 
 .login-container {
+  background:
+    linear-gradient(rgba(246, 248, 251, 0.9), rgba(246, 248, 251, 0.9)),
+    url("/car-rental-companies-1-scaled-1.jpg") center / cover no-repeat;
+  background-attachment: fixed;
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -753,7 +757,7 @@ p {
   width: 100%;
   max-width: 430px;
   padding: var(--space-7);
-  border-radius: 22px;
+  border-radius: 0px;
   border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--shadow-md);
@@ -768,7 +772,7 @@ p {
 .login-btn {
   width: 100%;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 0px;
   background: var(--brand-600);
   color: #fff;
   font-size: 15px;
