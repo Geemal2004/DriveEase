@@ -1,0 +1,318 @@
+i think of removign endmilage form createBooking and including another funtion for complete booking (returning vehicle)
+
+package com.driveease.service;
+
+import com.driveease.dto.BookingRequest;
+import com.driveease.dto.BookingResponse;
+import com.driveease.dto.BookingVehicleRequest;
+import com.driveease.enums.BookingStatus;
+import com.driveease.model.*;
+import com.driveease.repository.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class BookingService {
+
+    private static final BigDecimal MARKUP_PERCENTAGE = BigDecimal.valueOf(10.00);
+    private static final BigDecimal MARKUP_MULTIPLIER = BigDecimal.valueOf(1.10);
+
+    private final BookingRepository bookingRepository;
+    private final BookingVehicleRepository bookingVehicleRepository;
+    private final CustomerRepository customerRepository;
+    private final AppUserRepository appUserRepository;
+    private final VehicleRepository vehicleRepository;
+    private final DriverRepository driverRepository;
+
+    public BookingService(
+            BookingRepository bookingRepository,
+            BookingVehicleRepository bookingVehicleRepository,
+            CustomerRepository customerRepository,
+            AppUserRepository appUserRepository,
+            VehicleRepository vehicleRepository,
+            DriverRepository driverRepository
+    ) {
+        this.bookingRepository = bookingRepository;
+        this.bookingVehicleRepository = bookingVehicleRepository;
+        this.customerRepository = customerRepository;
+        this.appUserRepository = appUserRepository;
+        this.vehicleRepository = vehicleRepository;
+        this.driverRepository = driverRepository;
+    }
+
+    @Transactional
+    public BookingResponse createBooking(BookingRequest request) {
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + request.getCustomerId()));
+
+        AppUser createdBy = appUserRepository.findById(request.getCreatedByUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getCreatedByUserId()));
+
+        LocalDate returnDate = request.getPickupDate().plusDays(request.getRentalDays());
+
+        BookingStatus bookingStatus = request.getStatus() != null
+                ? request.getStatus()
+                : BookingStatus.CONFIRMED;
+
+        if (bookingStatus == BookingStatus.CONFIRMED) {
+            validateVehicleAvailability(request.getVehicles(), request.getPickupDate(), returnDate);
+        }
+
+        Booking booking = Booking.builder()
+                .customer(customer)
+                .createdBy(createdBy)
+                .pickupDate(request.getPickupDate())
+                .returnDate(returnDate)
+                .rentalDays(request.getRentalDays())
+                .markupPercentage(MARKUP_PERCENTAGE)
+                .totalAmount(BigDecimal.ZERO)
+                .status(bookingStatus)
+                .build();
+
+        Booking savedBooking = bookingRepository.save(booking);
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (BookingVehicleRequest vehicleRequest : request.getVehicles()) {
+            Vehicle vehicle = vehicleRepository.findById(vehicleRequest.getVehicleId())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + vehicleRequest.getVehicleId()));
+
+            Driver driver = null;
+
+            if (vehicleRequest.getDriverId() != null) {
+                driver = driverRepository.findById(vehicleRequest.getDriverId())
+                        .orElseThrow(() -> new RuntimeException("Driver not found with id: " + vehicleRequest.getDriverId()));
+            }
+
+            BigDecimal baseDailyRate = vehicle.getBaseDailyRate();
+
+            BigDecimal finalDailyRate = baseDailyRate
+                    .multiply(MARKUP_MULTIPLIER)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal lineTotal = finalDailyRate
+                    .multiply(BigDecimal.valueOf(request.getRentalDays()))
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            BookingVehicle bookingVehicle = BookingVehicle.builder()
+                    .booking(savedBooking)
+                    .vehicle(vehicle)
+                    .driver(driver)
+                    .startMileage(vehicleRequest.getStartMileage())
+                    .endMileage(vehicleRequest.getEndMileage())
+                    .baseDailyRate(baseDailyRate)
+                    .finalDailyRate(finalDailyRate)
+                    .lineTotal(lineTotal)
+                    .build();
+
+            bookingVehicleRepository.save(bookingVehicle);
+
+            totalAmount = totalAmount.add(lineTotal);
+        }
+
+        savedBooking.setTotalAmount(totalAmount);
+        Booking finalBooking = bookingRepository.save(savedBooking);
+
+        List<BookingVehicle> bookingVehicles =
+                bookingVehicleRepository.findByBookingBookingId(finalBooking.getBookingId());
+
+        return BookingResponse.fromEntity(finalBooking, bookingVehicles);
+    }
+
+    public List<BookingResponse> getAllBookings() {
+        return bookingRepository.findAll()
+                .stream()
+                .map(booking -> {
+                    List<BookingVehicle> bookingVehicles =
+                            bookingVehicleRepository.findByBookingBookingId(booking.getBookingId());
+
+                    return BookingResponse.fromEntity(booking, bookingVehicles);
+                })
+                .toList();
+    }
+
+    public BookingResponse getBookingById(Long id) {
+        Booking booking = getBookingEntityById(id);
+
+        List<BookingVehicle> bookingVehicles =
+                bookingVehicleRepository.findByBookingBookingId(id);
+
+        return BookingResponse.fromEntity(booking, bookingVehicles);
+    }
+
+    public BookingResponse cancelBooking(Long id) {
+        Booking booking = getBookingEntityById(id);
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        List<BookingVehicle> bookingVehicles =
+                bookingVehicleRepository.findByBookingBookingId(id);
+
+        return BookingResponse.fromEntity(updatedBooking, bookingVehicles);
+    }
+
+    public BookingResponse completeBooking(Long id) {
+        Booking booking = getBookingEntityById(id);
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        List<BookingVehicle> bookingVehicles =
+                bookingVehicleRepository.findByBookingBookingId(id);
+
+        return BookingResponse.fromEntity(updatedBooking, bookingVehicles);
+    }
+
+    private void validateVehicleAvailability(
+            List<BookingVehicleRequest> vehicleRequests,
+            LocalDate pickupDate,
+            LocalDate returnDate
+    ) {
+        for (BookingVehicleRequest vehicleRequest : vehicleRequests) {
+            boolean alreadyBooked = bookingVehicleRepository.existsVehicleBookingOverlap(
+                    vehicleRequest.getVehicleId(),
+                    pickupDate,
+                    returnDate,
+                    List.of(BookingStatus.CONFIRMED)
+            );
+
+            if (alreadyBooked) {
+                throw new RuntimeException(
+                        "Vehicle with id " + vehicleRequest.getVehicleId() +
+                                " is already booked for the selected date range"
+                );
+            }
+        }
+    }
+
+    private Booking getBookingEntityById(Long id) {
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+    }
+}
+package com.driveease.controller;
+
+import com.driveease.dto.BookingRequest;
+import com.driveease.dto.BookingResponse;
+import com.driveease.service.BookingService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/bookings")
+@CrossOrigin(origins = "http://localhost:5173")
+public class BookingController {
+
+    private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
+
+    @PostMapping
+    public BookingResponse createBooking(@Valid @RequestBody BookingRequest request) {
+        return bookingService.createBooking(request);
+    }
+
+    @GetMapping
+    public List<BookingResponse> getAllBookings() {
+        return bookingService.getAllBookings();
+    }
+
+    @GetMapping("/{id}")
+    public BookingResponse getBookingById(@PathVariable Long id) {
+        return bookingService.getBookingById(id);
+    }
+
+    @PutMapping("/{id}/cancel")
+    public BookingResponse cancelBooking(@PathVariable Long id) {
+        return bookingService.cancelBooking(id);
+    }
+
+    @PutMapping("/{id}/complete")
+    public BookingResponse completeBooking(@PathVariable Long id) {
+        return bookingService.completeBooking(id);
+    }
+}
+
+
+package com.driveease.dto;
+
+import java.util.List;
+
+public class CompleteBookingRequest {
+    private List<VehicleMileageUpdate> returnedVehicles;
+
+    // Getters and Setters
+    public List<VehicleMileageUpdate> getReturnedVehicles() { return returnedVehicles; }
+    public void setReturnedVehicles(List<VehicleMileageUpdate> returnedVehicles) { this.returnedVehicles = returnedVehicles; }
+}
+
+package com.driveease.dto;
+
+public class VehicleMileageUpdate {
+    private Long vehicleId;
+    private Double endMileage;
+
+    // Getters and Setters
+    public Long getVehicleId() { return vehicleId; }
+    public void setVehicleId(Long vehicleId) { this.vehicleId = vehicleId; }
+    public Double getEndMileage() { return endMileage; }
+    public void setEndMileage(Double endMileage) { this.endMileage = endMileage; }
+}
+
+// Inside createBooking() loop:
+BookingVehicle bookingVehicle = BookingVehicle.builder()
+        .booking(savedBooking)
+        .vehicle(vehicle)
+        .driver(driver)
+        .startMileage(vehicleRequest.getStartMileage())
+        // REMOVED: .endMileage(vehicleRequest.getEndMileage()) 
+        .baseDailyRate(baseDailyRate)
+        .finalDailyRate(finalDailyRate)
+        .lineTotal(lineTotal)
+        .build();
+
+
+        @Transactional // Added because we are saving multiple entities
+    public BookingResponse completeBooking(Long id, CompleteBookingRequest request) {
+        // 1. Update Booking Status
+        Booking booking = getBookingEntityById(id);
+        booking.setStatus(BookingStatus.COMPLETED);
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        // 2. Fetch associated vehicles
+        List<BookingVehicle> bookingVehicles = bookingVehicleRepository.findByBookingBookingId(id);
+
+        // 3. Update end mileages for each vehicle
+        for (BookingVehicle bookingVehicle : bookingVehicles) {
+            for (VehicleMileageUpdate mileageUpdate : request.getReturnedVehicles()) {
+                // Match the vehicle ID from the request to the saved BookingVehicle
+                if (bookingVehicle.getVehicle().getVehicleId().equals(mileageUpdate.getVehicleId())) {
+                    bookingVehicle.setEndMileage(mileageUpdate.getEndMileage());
+                    break;
+                }
+            }
+        }
+        
+        // Save the updated vehicle records in bulk
+        bookingVehicleRepository.saveAll(bookingVehicles);
+
+        return BookingResponse.fromEntity(updatedBooking, bookingVehicles);
+    }
+
+    @PutMapping("/{id}/complete")
+    public BookingResponse completeBooking(
+            @PathVariable Long id, 
+            @Valid @RequestBody CompleteBookingRequest request) {
+            
+        return bookingService.completeBooking(id, request);
+    }

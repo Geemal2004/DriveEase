@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   getAllVehicles,
   createVehicle,
@@ -12,6 +12,9 @@ import SegmentedTabs from "../components/SegmentedTabs";
 import SkeletonRows from "../components/SkeletonRows";
 
 function Vehicles() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [vehicles, setVehicles] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [editingVehicleId, setEditingVehicleId] = useState(null);
@@ -28,6 +31,8 @@ function Vehicles() {
     model: "",
     imageUrl: "",
     baseDailyRate: "",
+    serviceMileageInterval: "",
+    extraMileageRate: "",
     allowedMileagePerDay: "",
     availabilityStatus: "AVAILABLE",
     active: true,
@@ -37,6 +42,15 @@ function Vehicles() {
     setIsLoading(true);
     try {
       const data = await getAllVehicles();
+
+      const sortedVehicles = data.sort((a,b) => {
+        if (a.availabilityStatus === "AVAILABLE" && b.availabilityStatus !== "AVAILABLE") {
+          return -1;
+        }
+        if (a.availabilityStatus !== "AVAILABLE" && b.availabilityStatus === "AVAILABLE") {
+           return -1;
+        }
+      });
       setVehicles(data);
     } catch {
       setError("Failed to load vehicles.");
@@ -44,6 +58,21 @@ function Vehicles() {
       setIsLoading(false);
     }
   };
+
+  const filteredVehicles = useMemo(() => {
+    return vehicles.filter((vehicle) => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+      (vehicle.model && vehicle.model.toLowerCase().includes(searchLower)) ||
+      (vehicle.registrationNo && vehicle.registrationNo.toLowerCase().includes(searchLower));
+
+      const matchesType = 
+      typeFilter === "ALL" || vehicle.vehicleType === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+
+    });
+  }, [vehicles, searchTerm, statusFilter, typeFilter]);
 
   const loadContracts = async () => {
     try {
@@ -78,6 +107,8 @@ function Vehicles() {
       model: "",
       imageUrl: "",
       baseDailyRate: "",
+      serviceMileageInterval: "",
+      extraMileageRate: "",
       allowedMileagePerDay: "",
       availabilityStatus: "AVAILABLE",
       active: true,
@@ -154,6 +185,8 @@ function Vehicles() {
       model: vehicle.model || "",
       imageUrl: vehicle.imageUrl || "",
       baseDailyRate: vehicle.baseDailyRate || "",
+      extraMileageRate: vehicle. extraMileageRate || "",
+      serviceMileageInterval: vehicle.serviceMileageInterval || "",
       allowedMileagePerDay: vehicle.allowedMileagePerDay || "",
       availabilityStatus: vehicle.availabilityStatus || "AVAILABLE",
       active: vehicle.active ?? true,
@@ -315,6 +348,28 @@ function Vehicles() {
                 value={formData.baseDailyRate}
                 onChange={handleChange}
                 placeholder="Example: 10000"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Service Mileage Inerval </label>
+              <input
+                type="number"
+                name="serviceMileageInterval"
+                value={formData.serviceMileageInterval}
+                onChange={handleChange}
+                placeholder="Example: 5000"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Extra Mileage Rate</label>
+              <input
+                type="number"
+                name="extraMileageRate"
+                value={formData.extraMileageRate}
+                onChange={handleChange}
+                placeholder="Example: 120"
                 required
               />
             </div>

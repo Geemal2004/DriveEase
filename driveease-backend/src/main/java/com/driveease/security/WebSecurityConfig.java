@@ -61,6 +61,7 @@ public class WebSecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/error").permitAll()
                 // You can lock down other routes here, e.g.:
                 // .requestMatchers("/api/users/**").hasRole("ADMIN")
                 // For now, requiring authentication for everything else:

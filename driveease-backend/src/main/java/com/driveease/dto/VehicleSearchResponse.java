@@ -18,10 +18,12 @@ public class VehicleSearchResponse {
     private String model;
     private String imageUrl;
     private BigDecimal baseDailyRate;
+    private BigDecimal extraMileageRate;
     private BigDecimal finalDailyRate;
     private Integer rentalDays;
     private Integer numberOfVehicles;
     private BigDecimal totalPrice;
     private Integer allowedMileagePerDay;
+    private Integer serviceMileageInterval;
     private AvailabilityStatus availabilityStatus;
 }

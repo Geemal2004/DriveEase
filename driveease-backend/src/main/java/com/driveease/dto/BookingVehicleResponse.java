@@ -17,6 +17,10 @@ public class BookingVehicleResponse {
     private String model;
     private VehicleType vehicleType;
     private String providerName;
+    private Integer startMileage;
+    private Long driverId;
+    private String driverName;
+    private Integer endMileage;
     private BigDecimal baseDailyRate;
     private BigDecimal finalDailyRate;
     private BigDecimal lineTotal;
@@ -32,6 +36,18 @@ public class BookingVehicleResponse {
                 .baseDailyRate(bookingVehicle.getBaseDailyRate())
                 .finalDailyRate(bookingVehicle.getFinalDailyRate())
                 .lineTotal(bookingVehicle.getLineTotal())
+                .driverId(
+                    bookingVehicle.getDriver() != null
+                    ? bookingVehicle.getDriver().getDriverId()
+                    :null
+                )
+                .driverName(
+                    bookingVehicle.getDriver() != null
+                    ? bookingVehicle.getDriver().getFullName()
+                    :null
+                )
+                .startMileage(bookingVehicle.getStartMileage())
+                .endMileage(bookingVehicle.getEndMileage())
                 .build();
     }
 }

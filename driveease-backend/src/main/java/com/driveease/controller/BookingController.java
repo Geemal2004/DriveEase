@@ -2,6 +2,7 @@ package com.driveease.controller;
 
 import com.driveease.dto.BookingRequest;
 import com.driveease.dto.BookingResponse;
+import com.driveease.dto.CompleteBookingRequest;
 import com.driveease.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,9 @@ public class BookingController {
     }
 
     @PutMapping("/{id}/complete")
-    public BookingResponse completeBooking(@PathVariable Long id) {
-        return bookingService.completeBooking(id);
+    public BookingResponse completeBooking(
+        @PathVariable Long id,
+        @Valid @RequestBody CompleteBookingRequest request ) {
+        return bookingService.completeBooking(id, request);
     }
 }

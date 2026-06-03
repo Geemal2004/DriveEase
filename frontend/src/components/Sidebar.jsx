@@ -4,7 +4,7 @@ import authService from "../services/authService";
 function Sidebar() {
   const user = authService.getCurrentUser();
   const navigate = useNavigate();
-  const canManageProvidersAndContracts =
+  const canManageProvidersAndContractsAndDrivers =
     user?.roles?.includes("ROLE_ADMIN") || user?.roles?.includes("ROLE_MANAGER");
 
   const handleLogout = () => {
@@ -22,13 +22,19 @@ function Sidebar() {
             Dashboard
           </NavLink>
 
-          {canManageProvidersAndContracts && (
+          {canManageProvidersAndContractsAndDrivers && (
+            <NavLink to="/drivers" className="nav-link">
+              Drivers
+            </NavLink>
+          )}
+
+          {canManageProvidersAndContractsAndDrivers && (
             <NavLink to="/providers" className="nav-link">
               Providers
             </NavLink>
           )}
 
-          {canManageProvidersAndContracts && (
+          {canManageProvidersAndContractsAndDrivers && (
             <NavLink to="/contracts" className="nav-link">
               Contracts
             </NavLink>

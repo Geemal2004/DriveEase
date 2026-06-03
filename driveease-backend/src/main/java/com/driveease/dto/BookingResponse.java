@@ -23,7 +23,9 @@ public class BookingResponse {
     private LocalDate pickupDate;
     private LocalDate returnDate;
     private Integer rentalDays;
+    private Integer strMileage;
     private BigDecimal markupPercentage;
+    private BigDecimal extraMileageRate;
     private BigDecimal totalAmount;
     private BookingStatus status;
     private LocalDateTime createdAt;

@@ -39,10 +39,15 @@ public class Vehicle {
     @Column(nullable = false)
     private BigDecimal baseDailyRate;
 
+    private BigDecimal extraMileageRate = BigDecimal.ZERO;
+
     private Integer allowedMileagePerDay;
+
+    private Integer serviceMileageInterval;
 
     @Enumerated(EnumType.STRING)
     private AvailabilityStatus availabilityStatus = AvailabilityStatus.AVAILABLE;
 
     private Boolean active = true;
+
 }

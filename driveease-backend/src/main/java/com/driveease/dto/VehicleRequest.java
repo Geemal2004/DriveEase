@@ -31,9 +31,15 @@ public class VehicleRequest {
     @Positive(message = "Base daily rate must be greater than zero")
     private BigDecimal baseDailyRate;
 
+    private BigDecimal extraMileageRate;
+
     private Integer allowedMileagePerDay;
+
+    private Integer serviceMileageInterval;
 
     private AvailabilityStatus availabilityStatus;
 
     private Boolean active;
+
+
 }
