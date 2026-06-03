@@ -1,6 +1,7 @@
 package com.driveease.dto;
 
 import com.driveease.enums.BookingStatus;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -27,8 +28,9 @@ public class BookingRequest {
     @Positive(message = "Rental days must be greater than zero")
     private Integer rentalDays;
 
+    @Valid
     @NotEmpty(message = "At least one vehicle must be selected")
-    private List<Long> vehicleIds;
+    private List<BookingVehicleRequest> vehicles;
 
     private BookingStatus status;
 }

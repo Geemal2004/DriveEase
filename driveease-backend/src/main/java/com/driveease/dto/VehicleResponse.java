@@ -22,6 +22,8 @@ public class VehicleResponse {
     private String imageUrl;
     private BigDecimal baseDailyRate;
     private Integer allowedMileagePerDay;
+    private BigDecimal extraMileageRate;
+    private Integer serviceMileageInterval;
     private AvailabilityStatus availabilityStatus;
     private Boolean active;
 
@@ -37,6 +39,8 @@ public class VehicleResponse {
                 .imageUrl(vehicle.getImageUrl())
                 .baseDailyRate(vehicle.getBaseDailyRate())
                 .allowedMileagePerDay(vehicle.getAllowedMileagePerDay())
+                .extraMileageRate(vehicle.getExtraMileageRate())
+                .serviceMileageInterval(vehicle.getServiceMileageInterval())
                 .availabilityStatus(vehicle.getAvailabilityStatus())
                 .active(vehicle.getActive())
                 .build();

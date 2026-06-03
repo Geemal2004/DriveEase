@@ -45,9 +45,13 @@ public class VehicleService {
                 .imageUrl(request.getImageUrl())
                 .baseDailyRate(request.getBaseDailyRate())
                 .allowedMileagePerDay(request.getAllowedMileagePerDay())
+                .extraMileageRate(request.getExtraMileageRate() != null
+                     ? request.getExtraMileageRate()
+                     : BigDecimal.ZERO)
                 .availabilityStatus(request.getAvailabilityStatus() != null
                         ? request.getAvailabilityStatus()
                         : AvailabilityStatus.AVAILABLE)
+                .serviceMileageInterval(request.getServiceMileageInterval())
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
@@ -79,6 +83,11 @@ public class VehicleService {
         vehicle.setModel(request.getModel());
         vehicle.setImageUrl(request.getImageUrl());
         vehicle.setBaseDailyRate(request.getBaseDailyRate());
+        vehicle.setExtraMileageRate(request.getExtraMileageRate() != null
+                     ? request.getExtraMileageRate()
+                     : BigDecimal.ZERO);
+                
+        vehicle.setServiceMileageInterval(request.getServiceMileageInterval());
         vehicle.setAllowedMileagePerDay(request.getAllowedMileagePerDay());
 
         if (request.getAvailabilityStatus() != null) {
@@ -125,7 +134,6 @@ public class VehicleService {
 
         BigDecimal totalPrice = finalDailyRate
                 .multiply(BigDecimal.valueOf(request.getRentalDays()))
-                .multiply(BigDecimal.valueOf(1))
                 .setScale(2, RoundingMode.HALF_UP);
 
         return VehicleSearchResponse.builder()
@@ -136,11 +144,14 @@ public class VehicleService {
                 .model(vehicle.getModel())
                 .imageUrl(vehicle.getImageUrl())
                 .baseDailyRate(vehicle.getBaseDailyRate())
+                .extraMileageRate(vehicle.getExtraMileageRate())
                 .finalDailyRate(finalDailyRate)
                 .rentalDays(request.getRentalDays())
                 .numberOfVehicles(1)
                 .totalPrice(totalPrice)
                 .allowedMileagePerDay(vehicle.getAllowedMileagePerDay())
+                .extraMileageRate(vehicle.getExtraMileageRate())
+                .serviceMileageInterval(vehicle.getServiceMileageInterval())
                 .availabilityStatus(vehicle.getAvailabilityStatus())
                 .build();
     }
@@ -149,4 +160,6 @@ public class VehicleService {
         return vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
     }
+
+
 }

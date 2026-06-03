@@ -260,11 +260,10 @@ function SearchVehicles() {
                 <th>Select</th>
                 <th>Image</th>
                 <th>Vehicle Type</th>
-                <th>Provider</th>
                 <th>Reg No</th>
                 <th>Model</th>
-                <th>Base Rate</th>
-                <th>Final Daily Rate</th>
+                <th>Extra Mileage Rate</th>
+                <th> Daily Rate</th>
                 <th>Rental Days</th>
                 <th>Total Price</th>
                 <th>Availability</th>
@@ -312,10 +311,9 @@ function SearchVehicles() {
                       )}
                     </td>
                     <td>{vehicle.vehicleType}</td>
-                    <td>{vehicle.providerName}</td>
                     <td>{vehicle.registrationNo}</td>
                     <td>{vehicle.model}</td>
-                    <td className="numeric-cell">Rs. {Number(vehicle.baseDailyRate).toFixed(2)}</td>
+                    <td>{vehicle.extraMileageRate}</td>
                     <td className="numeric-cell">Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
                     <td className="numeric-cell">{vehicle.rentalDays}</td>
                     <td>

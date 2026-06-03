@@ -65,7 +65,9 @@ CREATE TABLE vehicle (
     model VARCHAR(100),
     image_url VARCHAR(500),
     base_daily_rate DECIMAL(10,2) NOT NULL,
+    extra_mileage_rate DECIMAL(10,2) DEFAULT 0.00,
     allowed_mileage_per_day INT,
+    service_mileage_interval INT,
     availability_status ENUM('AVAILABLE', 'NOT_AVAILABLE', 'MAINTENANCE') DEFAULT 'AVAILABLE',
     active BOOLEAN DEFAULT TRUE,
 
@@ -73,7 +75,6 @@ CREATE TABLE vehicle (
         FOREIGN KEY (contract_id)
         REFERENCES contract(contract_id)
 );
-
 -- =========================
 -- 5. CUSTOMER TABLE
 -- Customer who rents vehicles
@@ -113,6 +114,17 @@ CREATE TABLE booking (
         REFERENCES users(user_id)
 );
 
+
+CREATE TABLE driver (
+    driver_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    nic_or_passport VARCHAR(50),
+    driving_license_no VARCHAR(50),
+    status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =========================
 -- 7. BOOKING VEHICLE TABLE
 -- Vehicles included in a booking
@@ -121,6 +133,9 @@ CREATE TABLE booking_vehicle (
     booking_vehicle_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     booking_id BIGINT NOT NULL,
     vehicle_id BIGINT NOT NULL,
+    driver_id BIGINT,
+    start_mileage INT,
+    end_mileage INT,
     base_daily_rate DECIMAL(10,2) NOT NULL,
     final_daily_rate DECIMAL(10,2) NOT NULL,
     line_total DECIMAL(12,2) NOT NULL,
@@ -131,6 +146,26 @@ CREATE TABLE booking_vehicle (
         ON DELETE CASCADE,
 
     CONSTRAINT fk_booking_vehicle_vehicle
+        FOREIGN KEY (vehicle_id)
+        REFERENCES vehicle(vehicle_id),
+
+    CONSTRAINT fk_booking_vehicle_driver
+        FOREIGN KEY (driver_id)
+        REFERENCES driver(driver_id)
+);
+
+
+
+CREATE TABLE service_log (
+    log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id BIGINT NOT NULL,
+    service_location VARCHAR(255),
+    service_date DATE NOT NULL,
+    notes VARCHAR(500),
+    cost DECIMAL(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_service_log_vehicle
         FOREIGN KEY (vehicle_id)
         REFERENCES vehicle(vehicle_id)
 );

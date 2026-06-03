@@ -26,6 +26,16 @@ public class BookingVehicle {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
+    @ManyToOne
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
+    @Column(nullable = false)
+    private Integer startMileage;
+
+    @Column(nullable = true)
+    private Integer endMileage;
+
     @Column(nullable = false)
     private BigDecimal baseDailyRate;
 

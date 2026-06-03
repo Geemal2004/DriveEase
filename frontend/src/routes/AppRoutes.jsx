@@ -11,6 +11,7 @@ import Customers from "../pages/Customers";
 import Bookings from "../pages/Bookings";
 import Login from "../pages/Login";
 import RegisterUser from "../pages/RegisterUser";
+import Drivers from "../pages/Drivers";
 
 function AppRoutes() {
   return (
@@ -46,6 +47,7 @@ function AppRoutes() {
                 <Route element={<ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_MANAGER"]} />}>
                   <Route path="/providers" element={<Providers />} />
                   <Route path="/contracts" element={<Contracts />} />
+                  <Route path="/drivers" element={<Drivers/>} />
                 </Route>
                 
                 {/* Admin Only Route */}
