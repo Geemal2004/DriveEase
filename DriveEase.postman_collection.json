@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "b2f4f723-9ec3-4a91-9d1d-56c2d98fd001",
     "name": "DriveEase API",
-    "description": "Complete Postman collection for the DriveEase backend. Run Auth > Login first to save the JWT token and current user ID. Default seeded admin credentials are admin@driveease.com / admin123.",
+    "description": "Updated Postman collection for the DriveEase backend. Run Auth > Login first to save the JWT token and current user ID. Default seeded admin credentials: admin@driveease.com / admin123.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -15,26 +15,6 @@
       }
     ]
   },
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
   "variable": [
     {
       "key": "baseUrl",
@@ -65,11 +45,19 @@
       "value": "1"
     },
     {
+      "key": "driverId",
+      "value": "1"
+    },
+    {
       "key": "customerId",
       "value": "1"
     },
     {
       "key": "bookingId",
+      "value": "1"
+    },
+    {
+      "key": "serviceLogId",
       "value": "1"
     },
     {
@@ -98,9 +86,7 @@
                   "});",
                   "",
                   "const json = pm.response.json();",
-                  "if (json.token) {",
-                  "  pm.collectionVariables.set(\"token\", json.token);",
-                  "}",
+                  "if (json.token) pm.collectionVariables.set(\"token\", json.token);",
                   "if (json.id) {",
                   "  pm.collectionVariables.set(\"currentUserId\", json.id);",
                   "  pm.collectionVariables.set(\"userId\", json.id);",
@@ -129,17 +115,8 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Authenticates a user and saves `token`, `currentUserId`, and `userId` collection variables."
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Authenticates a user and saves token/currentUserId collection variables."
           },
           "response": []
         }
@@ -153,35 +130,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "admin",
-                "users"
-              ]
-            },
-            "description": "Admin-only endpoint. Returns users without password hashes."
+            "url": "{{baseUrl}}/admin/users",
+            "description": "Admin-only endpoint."
           },
           "response": []
         },
         {
           "name": "Register User",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"User registration request completed\", function () {",
-                  "  pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
-                  "});"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "POST",
             "header": [
@@ -199,17 +154,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "admin",
-                "users",
-                "register"
-              ]
-            },
+            "url": "{{baseUrl}}/admin/users/register",
             "description": "Admin-only. Valid roles: ADMIN, MANAGER, SUPPORT_AGENT."
           },
           "response": []
@@ -227,13 +172,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Provider created\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Provider created\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.providerId) {",
-                  "  pm.collectionVariables.set(\"providerId\", json.providerId);",
-                  "}"
+                  "if (json.providerId) pm.collectionVariables.set(\"providerId\", json.providerId);"
                 ]
               }
             }
@@ -255,16 +196,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/providers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "providers"
-              ]
-            },
-            "description": "Admin/Manager. Status values: ACTIVE, INACTIVE."
+            "url": "{{baseUrl}}/providers"
           },
           "response": []
         },
@@ -273,15 +205,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/providers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "providers"
-              ]
-            }
+            "url": "{{baseUrl}}/providers"
           },
           "response": []
         },
@@ -290,16 +214,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/providers/{{providerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "providers",
-                "{{providerId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/providers/{{providerId}}"
           },
           "response": []
         },
@@ -322,17 +237,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/providers/{{providerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "providers",
-                "{{providerId}}"
-              ]
-            },
-            "description": "Admin/Manager."
+            "url": "{{baseUrl}}/providers/{{providerId}}"
           },
           "response": []
         },
@@ -341,17 +246,8 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/providers/{{providerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "providers",
-                "{{providerId}}"
-              ]
-            },
-            "description": "Admin/Manager. Deactivates provider instead of hard deleting."
+            "url": "{{baseUrl}}/providers/{{providerId}}",
+            "description": "Soft-deactivates provider."
           },
           "response": []
         }
@@ -368,13 +264,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Contract created\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Contract created\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.contractId) {",
-                  "  pm.collectionVariables.set(\"contractId\", json.contractId);",
-                  "}"
+                  "if (json.contractId) pm.collectionVariables.set(\"contractId\", json.contractId);"
                 ]
               }
             }
@@ -396,16 +288,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/contracts",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contracts"
-              ]
-            },
-            "description": "Admin/Manager. Status values: ACTIVE, EXPIRED, REMOVED."
+            "url": "{{baseUrl}}/contracts"
           },
           "response": []
         },
@@ -414,15 +297,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/contracts",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contracts"
-              ]
-            }
+            "url": "{{baseUrl}}/contracts"
           },
           "response": []
         },
@@ -431,16 +306,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/contracts/{{contractId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contracts",
-                "{{contractId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/contracts/{{contractId}}"
           },
           "response": []
         },
@@ -463,17 +329,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/contracts/{{contractId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contracts",
-                "{{contractId}}"
-              ]
-            },
-            "description": "Admin/Manager."
+            "url": "{{baseUrl}}/contracts/{{contractId}}"
           },
           "response": []
         },
@@ -482,17 +338,8 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/contracts/{{contractId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contracts",
-                "{{contractId}}"
-              ]
-            },
-            "description": "Admin/Manager. Marks contract as removed."
+            "url": "{{baseUrl}}/contracts/{{contractId}}",
+            "description": "Marks contract as removed."
           },
           "response": []
         }
@@ -509,13 +356,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Vehicle image uploaded\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Vehicle image uploaded\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.imageUrl) {",
-                  "  pm.collectionVariables.set(\"vehicleImageUrl\", json.imageUrl);",
-                  "}"
+                  "if (json.imageUrl) pm.collectionVariables.set(\"vehicleImageUrl\", json.imageUrl);"
                 ]
               }
             }
@@ -529,20 +372,11 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": []
+                  "src": ""
                 }
               ]
             },
-            "url": {
-              "raw": "{{baseUrl}}/uploads/vehicle-image",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "uploads",
-                "vehicle-image"
-              ]
-            },
+            "url": "{{baseUrl}}/uploads/vehicle-image",
             "description": "Admin/Manager. Select an image file in Postman before sending."
           },
           "response": []
@@ -555,13 +389,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Contract document uploaded\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Contract document uploaded\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.fileUrl) {",
-                  "  pm.collectionVariables.set(\"contractDocumentUrl\", json.fileUrl);",
-                  "}"
+                  "if (json.fileUrl) pm.collectionVariables.set(\"contractDocumentUrl\", json.fileUrl);"
                 ]
               }
             }
@@ -575,21 +405,12 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": []
+                  "src": ""
                 }
               ]
             },
-            "url": {
-              "raw": "{{baseUrl}}/uploads/contract-document",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "uploads",
-                "contract-document"
-              ]
-            },
-            "description": "Admin/Manager. Select a PDF file in Postman before sending."
+            "url": "{{baseUrl}}/uploads/contract-document",
+            "description": "Admin/Manager. Select a PDF/document file in Postman before sending."
           },
           "response": []
         }
@@ -606,13 +427,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Vehicle created\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Vehicle created\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.vehicleId) {",
-                  "  pm.collectionVariables.set(\"vehicleId\", json.vehicleId);",
-                  "}"
+                  "if (json.vehicleId) pm.collectionVariables.set(\"vehicleId\", json.vehicleId);"
                 ]
               }
             }
@@ -627,23 +444,15 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"contractId\": {{contractId}},\n  \"vehicleType\": \"SUV\",\n  \"registrationNo\": \"CAB-1234\",\n  \"model\": \"Toyota CHR\",\n  \"imageUrl\": \"{{vehicleImageUrl}}\",\n  \"baseDailyRate\": 10000.00,\n  \"allowedMileagePerDay\": 100,\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"active\": true\n}",
+              "raw": "{\n  \"contractId\": {{contractId}},\n  \"vehicleType\": \"SUV\",\n  \"registrationNo\": \"CAB-1234\",\n  \"model\": \"Toyota RAV4\",\n  \"imageUrl\": \"{{vehicleImageUrl}}\",\n  \"baseDailyRate\": 10000.00,\n  \"extraMileageRate\": 120.00,\n  \"allowedMileagePerDay\": 100,\n  \"serviceMileageInterval\": 5000,\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/vehicles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles"
-              ]
-            },
-            "description": "Vehicle types: SUV, SEDAN, HATCHBACK, VAN, OTHER. Availability: AVAILABLE, NOT_AVAILABLE, MAINTENANCE."
+            "url": "{{baseUrl}}/vehicles",
+            "description": "Vehicle types: SUV, SEDAN, HATCHBACK, VAN, OTHER."
           },
           "response": []
         },
@@ -652,15 +461,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/vehicles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles"
-              ]
-            }
+            "url": "{{baseUrl}}/vehicles"
           },
           "response": []
         },
@@ -669,16 +470,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles",
-                "{{vehicleId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}"
           },
           "response": []
         },
@@ -694,23 +486,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"contractId\": {{contractId}},\n  \"vehicleType\": \"SUV\",\n  \"registrationNo\": \"CAB-1234\",\n  \"model\": \"Toyota CHR Updated\",\n  \"imageUrl\": \"{{vehicleImageUrl}}\",\n  \"baseDailyRate\": 12000.00,\n  \"allowedMileagePerDay\": 120,\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"active\": true\n}",
+              "raw": "{\n  \"contractId\": {{contractId}},\n  \"vehicleType\": \"SUV\",\n  \"registrationNo\": \"CAB-1234\",\n  \"model\": \"Toyota RAV4 Updated\",\n  \"imageUrl\": \"{{vehicleImageUrl}}\",\n  \"baseDailyRate\": 12000.00,\n  \"extraMileageRate\": 150.00,\n  \"allowedMileagePerDay\": 120,\n  \"serviceMileageInterval\": 5000,\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles",
-                "{{vehicleId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}"
           },
           "response": []
         },
@@ -719,17 +502,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles",
-                "{{vehicleId}}"
-              ]
-            },
-            "description": "Deactivates vehicle instead of hard deleting."
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}"
           },
           "response": []
         },
@@ -745,24 +518,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"pickupDate\": \"2026-06-15\",\n  \"rentalDays\": 3,\n  \"numberOfVehicles\": 1,\n  \"vehicleType\": \"SUV\"\n}",
+              "raw": "{\n  \"pickupDate\": \"2026-06-18\",\n  \"rentalDays\": 1,\n  \"numberOfVehicles\": 1,\n  \"vehicleType\": \"SUV\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/vehicles/search",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "vehicles",
-                "search"
-              ]
-            },
-            "description": "`vehicleType` is optional. Omit it or set null to search all vehicle types."
+            "url": "{{baseUrl}}/vehicles/search"
           },
           "response": []
         }
@@ -779,13 +542,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Customer created\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Customer created\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.customerId) {",
-                  "  pm.collectionVariables.set(\"customerId\", json.customerId);",
-                  "}"
+                  "if (json.customerId) pm.collectionVariables.set(\"customerId\", json.customerId);"
                 ]
               }
             }
@@ -807,15 +566,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/customers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customers"
-              ]
-            }
+            "url": "{{baseUrl}}/customers"
           },
           "response": []
         },
@@ -824,15 +575,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/customers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customers"
-              ]
-            }
+            "url": "{{baseUrl}}/customers"
           },
           "response": []
         },
@@ -841,16 +584,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/customers/{{customerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customers",
-                "{{customerId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/customers/{{customerId}}"
           },
           "response": []
         },
@@ -873,16 +607,7 @@
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/customers/{{customerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customers",
-                "{{customerId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/customers/{{customerId}}"
           },
           "response": []
         },
@@ -891,16 +616,98 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/customers/{{customerId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "customers",
-                "{{customerId}}"
-              ]
+            "url": "{{baseUrl}}/customers/{{customerId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Create Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Driver created\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "if (json.driverId) pm.collectionVariables.set(\"driverId\", json.driverId);"
+                ]
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Kasun Driver\",\n  \"phone\": \"0771112222\",\n  \"nicOrPassport\": \"901234567V\",\n  \"drivingLicenseNo\": \"DL123456\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/drivers"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/drivers"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Driver By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/drivers/{{driverId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Driver",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Kasun Driver Updated\",\n  \"phone\": \"0773334444\",\n  \"nicOrPassport\": \"901234567V\",\n  \"drivingLicenseNo\": \"DL123456\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/drivers/{{driverId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Driver",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/drivers/{{driverId}}"
           },
           "response": []
         }
@@ -917,13 +724,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Booking created\", function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
+                  "pm.test(\"Booking created\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
-                  "if (json.bookingId) {",
-                  "  pm.collectionVariables.set(\"bookingId\", json.bookingId);",
-                  "}"
+                  "if (json.bookingId) pm.collectionVariables.set(\"bookingId\", json.bookingId);"
                 ]
               }
             }
@@ -938,23 +741,15 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerId\": {{customerId}},\n  \"createdByUserId\": {{currentUserId}},\n  \"pickupDate\": \"2026-06-15\",\n  \"rentalDays\": 3,\n  \"vehicleIds\": [\n    {{vehicleId}}\n  ],\n  \"status\": \"CONFIRMED\"\n}",
+              "raw": "{\n  \"customerId\": {{customerId}},\n  \"createdByUserId\": {{currentUserId}},\n  \"pickupDate\": \"2026-06-18\",\n  \"rentalDays\": 1,\n  \"status\": \"CONFIRMED\",\n  \"vehicles\": [\n    {\n      \"vehicleId\": {{vehicleId}},\n      \"driverId\": {{driverId}},\n      \"startMileage\": 149999\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "url": {
-              "raw": "{{baseUrl}}/bookings",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "bookings"
-              ]
-            },
-            "description": "Status values: SIMULATED, CONFIRMED, CANCELLED, COMPLETED."
+            "url": "{{baseUrl}}/bookings",
+            "description": "Booking vehicle entries require vehicleId and startMileage. driverId is optional. Status values include SIMULATED and CONFIRMED."
           },
           "response": []
         },
@@ -963,15 +758,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/bookings",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "bookings"
-              ]
-            }
+            "url": "{{baseUrl}}/bookings"
           },
           "response": []
         },
@@ -980,16 +767,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "bookings",
-                "{{bookingId}}"
-              ]
-            }
+            "url": "{{baseUrl}}/bookings/{{bookingId}}"
           },
           "response": []
         },
@@ -998,36 +776,159 @@
           "request": {
             "method": "PUT",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "bookings",
-                "{{bookingId}}",
-                "cancel"
-              ]
-            }
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/cancel"
           },
           "response": []
         },
         {
           "name": "Complete Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Booking completion request completed\", function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}/complete",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "bookings",
-                "{{bookingId}}",
-                "complete"
-              ]
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnedVehicles\": [\n    {\n      \"vehicleId\": {{vehicleId}},\n      \"endMileage\": 150999\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/complete",
+            "description": "Calculates actual mileage, allowed mileage, extra mileage, extra mileage charge, and final booking total."
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Bookings Bulk",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookings\": [\n    {\n      \"bookingId\": {{bookingId}},\n      \"returnedVehicles\": [\n        {\n          \"vehicleId\": {{vehicleId}},\n          \"endMileage\": 150999\n        }\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/bookings/complete-bulk",
+            "description": "Completes multiple bookings and returns completed booking responses for receipt/payment workflows."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Logs",
+      "item": [
+        {
+          "name": "Create Service Log",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Service log created\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "if (json.serviceLogId) pm.collectionVariables.set(\"serviceLogId\", json.serviceLogId);"
+                ]
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": {{vehicleId}},\n  \"serviceLocation\": \"Colombo Service Center\",\n  \"serviceDate\": \"2026-06-20\",\n  \"notes\": \"Oil change and inspection\",\n  \"cost\": 15000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/service-logs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Service Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/service-logs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Log By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/service-logs/{{serviceLogId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Logs By Vehicle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/service-logs/vehicle/{{vehicleId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service Log",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": {{vehicleId}},\n  \"serviceLocation\": \"Colombo Service Center\",\n  \"serviceDate\": \"2026-06-21\",\n  \"notes\": \"Updated service notes\",\n  \"cost\": 17500.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/service-logs/{{serviceLogId}}"
           },
           "response": []
         }
