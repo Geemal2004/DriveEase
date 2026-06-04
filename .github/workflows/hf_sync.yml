@@ -18,13 +18,15 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Configure a temporary git identity for the push
+          # 1. Configure temporary git identity
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
           # 2. Add the Hugging Face remote
           git remote add hf https://geemal204:$HF_TOKEN@huggingface.co/spaces/geemal204/driveease
 
-          # 3. Isolate and push ONLY the backend directory
-          # This extracts the history of 'driveease-backend' and pushes it as the root of HF's main branch
-          git subtree push --prefix driveease-backend hf main
+          # 3. Split out the backend folder into its own local temporary branch
+          git subtree split --prefix=driveease-backend -b temp-backend-branch
+
+          # 4. FORCE push that isolated local branch into HF's main branch
+          git push hf temp-backend-branch:main --force
