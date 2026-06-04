@@ -44,6 +44,10 @@ function Sidebar() {
             Vehicles
           </NavLink>
 
+          <NavLink to="/service-logs" className="nav-link">
+            Service Logs
+          </NavLink>
+
           <NavLink to="/search-vehicles" className="nav-link">
             Search Vehicles
           </NavLink>

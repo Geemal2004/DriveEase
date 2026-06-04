@@ -19,3 +19,11 @@ export const completeBooking = async (id) => {
   const response = await api.put(`/bookings/${id}/complete`);
   return response.data;
 };
+
+export const updateVehicleReturnMileage = async (bookingVehicleId, returnData) => {
+  const response = await api.put(
+    `/bookings/vehicles/${bookingVehicleId}/return`,
+    returnData
+  );
+  return response.data;
+};

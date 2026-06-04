@@ -4,96 +4,88 @@ import {
   createBooking,
   cancelBooking,
   completeBooking,
+  updateVehicleReturnMileage,
 } from "../services/bookingService";
 import { getAllCustomers } from "../services/customerService";
 import { getAllDrivers } from "../services/driverService";
 import { searchVehicles } from "../services/vehicleService";
-import authService from "../services/authService";
-import EmptyState from "../components/EmptyState";
-import SegmentedTabs from "../components/SegmentedTabs";
-import SkeletonRows from "../components/SkeletonRows";
 
 function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [availableVehicles, setAvailableVehicles] = useState([]);
-  
-  // Array of selected vehicle IDs
-  const [selectedVehicleIds, setSelectedVehicleIds] = useState([]);
-  
-  // Object to store specific details (driverId, startMileage) mapped by vehicleId
-  const [vehicleAssignments, setVehicleAssignments] = useState({});
+  const [selectedVehicles, setSelectedVehicles] = useState({});
+  const [returnMileageInputs, setReturnMileageInputs] = useState({});
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
-  const [isLoadingCustomers, setIsLoadingCustomers] = useState(true);
-  const [isSearchingDrivers, setIsSearchingDrivers] = useState(false);
-  const [isSearchingVehicles, setIsSearchingVehicles] = useState(false);
-  
-  const [activeTab, setActiveTab] = useState("vehicles"); 
 
   const [formData, setFormData] = useState({
     customerId: "",
-    createdByUserId: authService.getCurrentUser()?.id || 1,
+    createdByUserId: 1,
     pickupDate: "",
     rentalDays: 1,
     numberOfVehicles: 1,
     vehicleType: "SUV",
     status: "CONFIRMED",
-    needsDriver: false,
   });
 
+  useEffect(() => {
+    loadBookings();
+    loadCustomers();
+    loadDrivers();
+  }, []);
+
   const loadBookings = async () => {
-    setIsLoadingBookings(true);
     try {
       const data = await getAllBookings();
       setBookings(data);
-    } catch {
+    } catch (err) {
       setError("Failed to load bookings.");
-    } finally {
-      setIsLoadingBookings(false);
     }
   };
 
   const loadCustomers = async () => {
-    setIsLoadingCustomers(true);
     try {
       const data = await getAllCustomers();
       setCustomers(data);
-    } catch {
+    } catch (err) {
       setError("Failed to load customers.");
-    } finally {
-      setIsLoadingCustomers(false);
+    }
+  };
+
+  const loadDrivers = async () => {
+    try {
+      const data = await getAllDrivers();
+      setDrivers(data.filter((driver) => driver.status === "ACTIVE"));
+    } catch (err) {
+      setError("Failed to load drivers.");
     }
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    setFormData((prev) => ({
-      ...prev,
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
       [name]:
-        type === "checkbox"
-          ? checked 
-          : name === "customerId" ||
-            name === "createdByUserId" ||
-            name === "rentalDays" ||
-            name === "numberOfVehicles"
+        name === "customerId" ||
+        name === "createdByUserId" ||
+        name === "rentalDays" ||
+        name === "numberOfVehicles"
           ? Number(value)
           : value,
-    }));
+    });
   };
 
   const handleSearchVehicles = async (e) => {
     e.preventDefault();
+
     setMessage("");
     setError("");
     setAvailableVehicles([]);
-    setSelectedVehicleIds([]);
-    setVehicleAssignments({});
-    setIsSearchingVehicles(true);
+    setSelectedVehicles({});
 
     try {
       const searchPayload = {
@@ -109,68 +101,53 @@ function Bookings() {
       if (data.length === 0) {
         setMessage("No available vehicles found for the selected criteria.");
       } else {
-        setMessage(`${data.length} available vehicle(s) found. Select vehicles to proceed.`);
+        setMessage(`${data.length} available vehicle(s) found.`);
       }
     } catch (err) {
       const backendMessage = err.response?.data?.message;
       setError(backendMessage || "Failed to search available vehicles.");
-    } finally {
-      setIsSearchingVehicles(false);
     }
   };
 
-  const handleVehicleSelect = (vehicleId, vehicleData) => {
-    if (selectedVehicleIds.includes(vehicleId)) {
-      // Remove from array and assignments
-      setSelectedVehicleIds(selectedVehicleIds.filter((id) => id !== vehicleId));
-      setVehicleAssignments((prev) => {
-        const copy = { ...prev };
-        delete copy[vehicleId];
-        return copy;
-      });
-      setError("");
-    } else {
-      // Check limit
-      if (selectedVehicleIds.length >= Number(formData.numberOfVehicles)) {
-        setError(`You can only select ${formData.numberOfVehicles} vehicle(s).`);
-        return;
-      }
-      
-      // Add to array and initialize assignments
-      setSelectedVehicleIds([...selectedVehicleIds, vehicleId]);
-      setVehicleAssignments((prev) => ({
-        ...prev,
-        [vehicleId]: {
-          driverId: "",
-          // Use current mileage from DB if available, otherwise default to 0
-          startMileage: vehicleData.currentMileage || vehicleData.startMileage || 0, 
-        }
-      }));
-      setError("");
+  const isVehicleSelected = (vehicleId) => {
+    return Boolean(selectedVehicles[vehicleId]);
+  };
+
+  const handleVehicleSelect = (vehicle) => {
+    const vehicleId = vehicle.vehicleId;
+
+    if (selectedVehicles[vehicleId]) {
+      const updatedSelectedVehicles = { ...selectedVehicles };
+      delete updatedSelectedVehicles[vehicleId];
+      setSelectedVehicles(updatedSelectedVehicles);
+      return;
     }
-  };
 
-  const handleAssignmentChange = (vehicleId, field, value) => {
-    setVehicleAssignments((prev) => ({
-      ...prev,
-      [vehicleId]: {
-        ...prev[vehicleId],
-        [field]: value,
-      }
-    }));
-  };
+    if (Object.keys(selectedVehicles).length >= Number(formData.numberOfVehicles)) {
+      setError(`You can only select ${formData.numberOfVehicles} vehicle(s).`);
+      return;
+    }
 
-  const loadDriversForAssignment = async () => {
-    setIsSearchingDrivers(true);
     setError("");
-    try {
-      const data = await getAllDrivers();
-      setAvailableDrivers(data);
-    } catch (err) {
-      setError("Failed to load drivers for assignment.");
-    } finally {
-      setIsSearchingDrivers(false);
-    }
+
+    setSelectedVehicles({
+      ...selectedVehicles,
+      [vehicleId]: {
+        vehicleId,
+        driverId: "",
+        startMileage: "",
+      },
+    });
+  };
+
+  const handleSelectedVehicleChange = (vehicleId, field, value) => {
+    setSelectedVehicles({
+      ...selectedVehicles,
+      [vehicleId]: {
+        ...selectedVehicles[vehicleId],
+        [field]: value,
+      },
+    });
   };
 
   const handleCreateBooking = async () => {
@@ -182,263 +159,526 @@ function Bookings() {
       return;
     }
 
-    if (selectedVehicleIds.length === 0) {
+    const selectedVehicleList = Object.values(selectedVehicles);
+
+    if (selectedVehicleList.length === 0) {
       setError("Please select at least one vehicle.");
       return;
     }
 
-    try {
-      // Map state exactly to the requested payload structure
-      const formattedVehicles = selectedVehicleIds.map((vId) => ({
-        vehicleId: vId,
-        driverId: vehicleAssignments[vId]?.driverId ? Number(vehicleAssignments[vId].driverId) : null,
-        startMileage: Number(vehicleAssignments[vId]?.startMileage) || 0,
-      }));
+    const invalidStartMileage = selectedVehicleList.some(
+      (vehicle) => vehicle.startMileage === "" || vehicle.startMileage === null
+    );
 
+    if (invalidStartMileage) {
+      setError("Please enter start mileage for all selected vehicles.");
+      return;
+    }
+
+    try {
       const payload = {
         customerId: Number(formData.customerId),
         createdByUserId: Number(formData.createdByUserId),
         pickupDate: formData.pickupDate,
         rentalDays: Number(formData.rentalDays),
         status: formData.status,
-        vehicles: formattedVehicles, // Embedded array of objects
+        vehicles: selectedVehicleList.map((vehicle) => ({
+          vehicleId: Number(vehicle.vehicleId),
+          driverId: vehicle.driverId ? Number(vehicle.driverId) : null,
+          startMileage: Number(vehicle.startMileage),
+        })),
       };
 
       await createBooking(payload);
 
       setMessage("Booking created successfully.");
       setAvailableVehicles([]);
-      setSelectedVehicleIds([]);
-      setVehicleAssignments({});
-      
+      setSelectedVehicles({});
+
       setFormData({
         customerId: "",
-        createdByUserId: authService.getCurrentUser()?.id || 1,
+        createdByUserId: 1,
         pickupDate: "",
         rentalDays: 1,
         numberOfVehicles: 1,
         vehicleType: "SUV",
         status: "CONFIRMED",
-        needsDriver: false,
       });
 
-      void loadBookings();
-      setActiveTab("bookings");
+      loadBookings();
     } catch (err) {
       const backendMessage = err.response?.data?.message;
       setError(backendMessage || "Failed to create booking.");
     }
   };
 
-  // ... (handleCancelBooking and handleCompleteBooking remain exactly the same)
   const handleCancelBooking = async (id) => {
-    const confirmCancel = window.confirm("Are you sure you want to cancel this booking?");
-    if (!confirmCancel) return;
-    try { await cancelBooking(id); void loadBookings(); } catch {}
+    const confirmCancel = window.confirm(
+      "Are you sure you want to cancel this booking?"
+    );
+
+    if (!confirmCancel) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+
+    try {
+      await cancelBooking(id);
+      setMessage("Booking cancelled successfully.");
+      loadBookings();
+    } catch (err) {
+      setError("Failed to cancel booking.");
+    }
   };
 
   const handleCompleteBooking = async (id) => {
-    const confirmComplete = window.confirm("Are you sure you want to mark this booking as completed?");
-    if (!confirmComplete) return;
-    try { await completeBooking(id); void loadBookings(); } catch {}
+    const confirmComplete = window.confirm(
+      "Are you sure you want to mark this booking as completed?"
+    );
+
+    if (!confirmComplete) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+
+    try {
+      await completeBooking(id);
+      setMessage("Booking completed successfully.");
+      loadBookings();
+    } catch (err) {
+      setError("Failed to complete booking.");
+    }
+  };
+
+  const handleReturnMileageChange = (bookingVehicleId, value) => {
+    setReturnMileageInputs({
+      ...returnMileageInputs,
+      [bookingVehicleId]: value,
+    });
+  };
+
+  const handleUpdateReturnMileage = async (bookingVehicleId) => {
+    setMessage("");
+    setError("");
+
+    const endMileage = returnMileageInputs[bookingVehicleId];
+
+    if (!endMileage) {
+      setError("Please enter end mileage.");
+      return;
+    }
+
+    try {
+      await updateVehicleReturnMileage(bookingVehicleId, {
+        endMileage: Number(endMileage),
+      });
+
+      setMessage("Return mileage updated successfully.");
+
+      setReturnMileageInputs({
+        ...returnMileageInputs,
+        [bookingVehicleId]: "",
+      });
+
+      loadBookings();
+    } catch (err) {
+      const backendMessage = err.response?.data?.message;
+      setError(backendMessage || "Failed to update return mileage.");
+    }
   };
 
   const selectedTotal = availableVehicles
-    .filter((vehicle) => selectedVehicleIds.includes(vehicle.vehicleId))
+    .filter((vehicle) => selectedVehicles[vehicle.vehicleId])
     .reduce((sum, vehicle) => sum + Number(vehicle.totalPrice), 0);
-
-  useEffect(() => {
-    void loadBookings();
-    void loadCustomers();
-  }, []);
-
-  // If they need to enter mileage OR assign a driver, give them the configuration tab
-  // If they skip the driver, we still need startMileage. 
-  const dynamicTabs = [
-    { key: "vehicles", label: "1. Select Vehicles" },
-    { key: "configure", label: formData.needsDriver ? "2. Configure Vehicles & Drivers" : "2. Configure Mileage" },
-    { key: "bookings", label: "3. Booking List" }
-  ];
 
   return (
     <div>
-      <div className="sticky-page-header">
-        <div className="page-header">
-          <div>
-            <h1>Bookings</h1>
-            <p>Create bookings from availability and monitor all reservation states.</p>
-          </div>
-          <SegmentedTabs tabs={dynamicTabs} activeKey={activeTab} onChange={setActiveTab} />
+      <div className="page-header">
+        <div>
+          <h1>Bookings</h1>
+          <p>Create and manage customer vehicle rental bookings.</p>
         </div>
       </div>
 
       {message && <div className="success-message">{message}</div>}
       {error && <div className="error-message">{error}</div>}
 
-      {/* --- TAB 1: VEHICLE SELECTION --- */}
-      {activeTab === "vehicles" && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="form-card">
-            <h2>Search Criteria</h2>
-            {/* Form inputs are the same as previously defined */}
-            <form onSubmit={handleSearchVehicles}>
-              <div className="four-col-grid">
-                <div className="form-group">
-                  <label>Customer</label>
-                  <select name="customerId" value={formData.customerId} onChange={handleChange} required>
-                    <option value="">Select Customer</option>
-                    {!isLoadingCustomers && customers.map((c) => (
-                      <option key={c.customerId} value={c.customerId}>{c.fullName}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Pickup Date</label>
-                  <input type="date" name="pickupDate" value={formData.pickupDate} onChange={handleChange} required />
-                </div>
-                <div className="form-group">
-                  <label>Rental Days</label>
-                  <input type="number" name="rentalDays" min="1" value={formData.rentalDays} onChange={handleChange} required />
-                </div>
-                <div className="form-group">
-                  <label>Number of Vehicles</label>
-                  <input type="number" name="numberOfVehicles" min="1" value={formData.numberOfVehicles} onChange={handleChange} required />
-                </div>
-                
-                <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <input type="checkbox" id="needsDriver" name="needsDriver" checked={formData.needsDriver} onChange={handleChange} style={{ width: '18px', height: '18px' }} />
-                  <label htmlFor="needsDriver" style={{ marginBottom: 0, fontWeight: 'bold' }}>Include Driver(s) with this Booking</label>
-                </div>
+      <div className="booking-grid">
+        <div className="form-card">
+          <h2>Create Booking</h2>
 
-                <div className="form-actions" style={{ gridColumn: '1 / -1' }}>
-                  <button type="submit" className="primary-button" disabled={isSearchingVehicles}>
-                    Search Available Vehicles
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <div className="table-card">
-            <h2>Available Vehicles</h2>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Select</th>
-                  <th>Reg No</th>
-                  <th>Type / Model</th>
-                  <th>Total Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isSearchingVehicles ? <SkeletonRows rows={3} columns={4} /> : availableVehicles.map((v) => (
-                  <tr key={v.vehicleId}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedVehicleIds.includes(v.vehicleId)}
-                        onChange={() => handleVehicleSelect(v.vehicleId, v)}
-                      />
-                    </td>
-                    <td>{v.registrationNo}</td>
-                    <td>{v.vehicleType} - {v.model}</td>
-                    <td>Rs. {Number(v.totalPrice).toFixed(2)}</td>
-                  </tr>
+          <form onSubmit={handleSearchVehicles}>
+            <div className="form-group">
+              <label>Customer</label>
+              <select
+                name="customerId"
+                value={formData.customerId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Customer</option>
+                {customers.map((customer) => (
+                  <option key={customer.customerId} value={customer.customerId}>
+                    {customer.fullName} - {customer.phone || "No phone"}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </select>
+            </div>
 
-          {selectedVehicleIds.length > 0 && (
+            <div className="form-group">
+              <label>Pickup Date</label>
+              <input
+                type="date"
+                name="pickupDate"
+                value={formData.pickupDate}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Rental Days</label>
+              <input
+                type="number"
+                name="rentalDays"
+                min="1"
+                value={formData.rentalDays}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Number of Vehicles</label>
+              <input
+                type="number"
+                name="numberOfVehicles"
+                min="1"
+                value={formData.numberOfVehicles}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Vehicle Type</label>
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleChange}
+              >
+                <option value="SUV">SUV</option>
+                <option value="SEDAN">SEDAN</option>
+                <option value="HATCHBACK">HATCHBACK</option>
+                <option value="VAN">VAN</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Booking Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="SIMULATED">SIMULATED</option>
+              </select>
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="primary-button">
+                Search Available Vehicles
+              </button>
+            </div>
+          </form>
+
+          {Object.keys(selectedVehicles).length > 0 && (
             <div className="summary-box">
-              <h3>Vehicles Selected: <span className="numeric-value">{selectedVehicleIds.length}</span></h3>
-              <button type="button" className="primary-button" onClick={() => {
-                if (formData.needsDriver) loadDriversForAssignment();
-                setActiveTab("configure");
-              }}>
-                Next: Configure Details
+              <h3>Selected Booking Summary</h3>
+
+              <p>
+                <strong>Selected Vehicles:</strong>{" "}
+                {Object.keys(selectedVehicles).length}
+              </p>
+
+              <p>
+                <strong>Estimated Total:</strong> Rs. {selectedTotal.toFixed(2)}
+              </p>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleCreateBooking}
+              >
+                Create Booking
               </button>
             </div>
           )}
         </div>
-      )}
 
-      {/* --- TAB 2: CONFIGURE VEHICLES (START MILEAGE & DRIVERS) --- */}
-      {activeTab === "configure" && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="form-card">
-             <h2>Configure Assigned Vehicles</h2>
-             <p>Set the starting mileage for each vehicle, and assign drivers if requested.</p>
-          </div>
+        <div className="table-card">
+          <h2>Available Vehicles</h2>
 
-          <div className="table-card">
-            <table className="data-table">
-              <thead>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Image</th>
+                <th>Provider</th>
+                <th>Type</th>
+                <th>Reg No</th>
+                <th>Model</th>
+                <th>Daily Rate</th>
+                <th>Total</th>
+                <th>Driver</th>
+                <th>Start Mileage</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {availableVehicles.length === 0 ? (
                 <tr>
-                  <th>Vehicle</th>
-                  <th>Start Mileage</th>
-                  {formData.needsDriver && <th>Assign Driver</th>}
+                  <td colSpan="10" className="empty-table">
+                    Search vehicles to create a booking.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {selectedVehicleIds.map((vId) => {
-                  const vehicle = availableVehicles.find(v => v.vehicleId === vId);
-                  return (
-                    <tr key={vId}>
-                      <td><strong>{vehicle?.registrationNo}</strong> ({vehicle?.model})</td>
-                      <td>
-                        <input 
-                          type="number" 
-                          min="0"
-                          value={vehicleAssignments[vId]?.startMileage || ""}
-                          onChange={(e) => handleAssignmentChange(vId, "startMileage", e.target.value)}
-                          style={{ padding: '8px', width: '150px' }}
+              ) : (
+                availableVehicles.map((vehicle) => (
+                  <tr key={vehicle.vehicleId}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={isVehicleSelected(vehicle.vehicleId)}
+                        onChange={() => handleVehicleSelect(vehicle)}
+                      />
+                    </td>
+
+                    <td>
+                      {vehicle.imageUrl ? (
+                        <img
+                          src={vehicle.imageUrl}
+                          alt={vehicle.model}
+                          className="vehicle-thumb"
                         />
-                      </td>
-                      {formData.needsDriver && (
-                        <td>
-                          {isSearchingDrivers ? (
-                             <span>Loading drivers...</span>
-                          ) : (
-                             <select 
-                               value={vehicleAssignments[vId]?.driverId || ""} 
-                               onChange={(e) => handleAssignmentChange(vId, "driverId", e.target.value)}
-                               style={{ padding: '8px', width: '200px' }}
-                             >
-                               <option value="">-- No Driver --</option>
-                               {availableDrivers.map(d => (
-                                 <option key={d.driverId} value={d.driverId}>
-                                   {d.name} (Rs. {d.dailyRate})
-                                 </option>
-                               ))}
-                             </select>
-                          )}
-                        </td>
+                      ) : (
+                        "No image"
                       )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                    </td>
 
-          <div className="summary-box">
-             <h3>Final Booking Summary</h3>
-             <p><strong>Total Vehicle Amount:</strong> Rs. {selectedTotal.toFixed(2)}</p>
-             <button type="button" className="primary-button" onClick={handleCreateBooking}>
-               Confirm & Create Booking
-             </button>
-          </div>
+                    <td>{vehicle.providerName}</td>
+                    <td>{vehicle.vehicleType}</td>
+                    <td>{vehicle.registrationNo}</td>
+                    <td>{vehicle.model}</td>
+                    <td>Rs. {Number(vehicle.finalDailyRate).toFixed(2)}</td>
+                    <td>
+                      <strong>
+                        Rs. {Number(vehicle.totalPrice).toFixed(2)}
+                      </strong>
+                    </td>
+
+                    <td>
+                      {isVehicleSelected(vehicle.vehicleId) ? (
+                        <select
+                          value={
+                            selectedVehicles[vehicle.vehicleId]?.driverId || ""
+                          }
+                          onChange={(e) =>
+                            handleSelectedVehicleChange(
+                              vehicle.vehicleId,
+                              "driverId",
+                              e.target.value
+                            )
+                          }
+                        >
+                          <option value="">No Driver</option>
+                          {drivers.map((driver) => (
+                            <option
+                              key={driver.driverId}
+                              value={driver.driverId}
+                            >
+                              {driver.fullName}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
+                    <td>
+                      {isVehicleSelected(vehicle.vehicleId) ? (
+                        <input
+                          type="number"
+                          className="small-input"
+                          value={
+                            selectedVehicles[vehicle.vehicleId]?.startMileage ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            handleSelectedVehicleChange(
+                              vehicle.vehicleId,
+                              "startMileage",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Start km"
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {/* --- TAB 3: BOOKING LIST --- */}
-      {activeTab === "bookings" && (
-         <div className="table-card booking-list-card">
-            {/* Existing Table Code for Bookings List */}
-            <h2>Booking List</h2>
-         </div>
-      )}
+      <div className="table-card booking-list-card">
+        <h2>Booking List</h2>
+
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Pickup</th>
+              <th>Return</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Vehicles</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {bookings.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="empty-table">
+                  No bookings found.
+                </td>
+              </tr>
+            ) : (
+              bookings.map((booking) => (
+                <tr key={booking.bookingId}>
+                  <td>{booking.bookingId}</td>
+                  <td>{booking.customerName}</td>
+                  <td>{booking.pickupDate}</td>
+                  <td>{booking.returnDate}</td>
+                  <td>
+                    <strong>
+                      Rs. {Number(booking.totalAmount).toFixed(2)}
+                    </strong>
+                  </td>
+                  <td>
+                    <span
+                      className={
+                        booking.status === "CONFIRMED" ||
+                        booking.status === "COMPLETED"
+                          ? "status-active"
+                          : "status-inactive"
+                      }
+                    >
+                      {booking.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    {booking.vehicles?.map((vehicle) => (
+                      <div
+                        key={vehicle.bookingVehicleId}
+                        className="booking-vehicle-box"
+                      >
+                        <div>
+                          <strong>
+                            {vehicle.registrationNo} - {vehicle.vehicleType}
+                          </strong>
+                        </div>
+
+                        <div className="muted-text">
+                          Driver: {vehicle.driverName || "No driver"}
+                        </div>
+
+                        <div className="muted-text">
+                          Start: {vehicle.startMileage || "N/A"} km | End:{" "}
+                          {vehicle.endMileage || "N/A"} km
+                        </div>
+
+                        <div className="muted-text">
+                          Extra: {vehicle.extraMileage || 0} km | Charge: Rs.{" "}
+                          {Number(vehicle.extraMileageCharge || 0).toFixed(2)}
+                        </div>
+
+                        {booking.status === "CONFIRMED" &&
+                          vehicle.endMileage === null && (
+                            <div className="return-mileage-row">
+                              <input
+                                type="number"
+                                className="small-input"
+                                placeholder="End mileage"
+                                value={
+                                  returnMileageInputs[
+                                    vehicle.bookingVehicleId
+                                  ] || ""
+                                }
+                                onChange={(e) =>
+                                  handleReturnMileageChange(
+                                    vehicle.bookingVehicleId,
+                                    e.target.value
+                                  )
+                                }
+                              />
+
+                              <button
+                                className="small-button"
+                                onClick={() =>
+                                  handleUpdateReturnMileage(
+                                    vehicle.bookingVehicleId
+                                  )
+                                }
+                              >
+                                Update Return
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    ))}
+                  </td>
+
+                  <td>
+                    {booking.status === "CONFIRMED" && (
+                      <>
+                        <button
+                          className="danger-button"
+                          onClick={() => handleCancelBooking(booking.bookingId)}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          className="small-button"
+                          onClick={() =>
+                            handleCompleteBooking(booking.bookingId)
+                          }
+                        >
+                          Complete
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
