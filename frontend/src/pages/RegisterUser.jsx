@@ -75,56 +75,58 @@ const RegisterUser = () => {
       {message && <div className="success-message">{message}</div>}
       {error && <div className="error-message">{error}</div>}
 
-      <div className="content-grid">
-        <div className="panel-card">
+      <div className="booking-stack">
+        <div className="form-card">
           <h2 style={{ marginBottom: "20px" }}>Register New User (Admin Only)</h2>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                minLength={3}
-              />
-            </div>
+            <div className="horizontal-form-grid user-form-grid">
+              <div className="form-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  minLength={3}
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-              />
-            </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Role</label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="MANAGER">Manager</option>
-                <option value="SUPPORT_AGENT">Support Agent</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              <div className="form-group">
+                <label>Role</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                >
+                  <option value="MANAGER">Manager</option>
+                  <option value="SUPPORT_AGENT">Support Agent</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-actions">

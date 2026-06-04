@@ -93,7 +93,9 @@ function Vehicles() {
           ? checked
           : name === "contractId" ||
             name === "baseDailyRate" ||
-            name === "allowedMileagePerDay"
+            name === "extraMileageRate" ||
+            name === "allowedMileagePerDay" ||
+            name === "serviceMileageInterval"
           ? Number(value)
           : value,
     });
@@ -152,6 +154,12 @@ function Vehicles() {
       ...formData,
       contractId: Number(formData.contractId),
       baseDailyRate: Number(formData.baseDailyRate),
+      extraMileageRate: formData.extraMileageRate
+        ? Number(formData.extraMileageRate)
+        : 0,
+      serviceMileageInterval: formData.serviceMileageInterval
+        ? Number(formData.serviceMileageInterval)
+        : null,
       allowedMileagePerDay: formData.allowedMileagePerDay
         ? Number(formData.allowedMileagePerDay)
         : null,
@@ -488,6 +496,13 @@ function Vehicles() {
                         ) : (
                           "N/A"
                         )}
+                      </div>
+                      <div>
+                        <strong>Extra Rate:</strong>{" "}
+                        <span className="numeric-value">
+                          Rs. {Number(vehicle.extraMileageRate || 0).toFixed(2)}
+                        </span>{" "}
+                        / km
                       </div>
                       <div><strong>Active:</strong> {vehicle.active ? "Yes" : "No"}</div>
                     </div>

@@ -44,4 +44,14 @@ public class BookingVehicle {
 
     @Column(nullable = false)
     private BigDecimal lineTotal;
+
+    private Integer allowedMileage;
+
+    private Integer actualMileage;
+
+    private Integer extraMileage;
+
+    private BigDecimal extraMileageRate = BigDecimal.ZERO;
+
+    private BigDecimal extraMileageCharge = BigDecimal.ZERO;
 }

@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/service-logs")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ServiceLogController {
     private final ServiceLogService serviceLogService;
 
