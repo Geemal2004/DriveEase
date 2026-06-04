@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://geemal204-driveease.hf.space",
   headers: {
     "Content-Type": "application/json",
   },
