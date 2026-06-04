@@ -65,6 +65,7 @@ function Vehicles() {
       const matchesSearch = 
       (vehicle.model && vehicle.model.toLowerCase().includes(searchLower)) ||
       (vehicle.registrationNo && vehicle.registrationNo.toLowerCase().includes(searchLower));
+      const matchesStatus = statusFilter === "ALL" || vehicle.availabilityStatus === statusFilter;
 
       const matchesType = 
       typeFilter === "ALL" || vehicle.vehicleType === typeFilter;
@@ -441,7 +442,13 @@ function Vehicles() {
           <h2 style={{ marginBottom: "20px" }}>Vehicle List</h2>
 
           {isLoading ? (
-            <SkeletonRows rows={6} columns={11} />
+            <table style={{ display: "none" }}>
+    <tbody>
+       <SkeletonRows rows={6} columns={11} />
+
+    </tbody>
+    </table>
+           
           ) : vehicles.length === 0 ? (
             <div className="empty-table" style={{ background: "var(--bg-elevated)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border-subtle)" }}>
               <EmptyState
