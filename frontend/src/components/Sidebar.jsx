@@ -14,7 +14,7 @@ function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div>
+      <div className="sidebar-main">
         <h2 className="logo">DriveEase</h2>
 
         <nav className="nav-menu">

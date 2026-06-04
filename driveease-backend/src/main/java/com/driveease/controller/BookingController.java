@@ -2,6 +2,7 @@ package com.driveease.controller;
 
 import com.driveease.dto.BookingRequest;
 import com.driveease.dto.BookingResponse;
+import com.driveease.dto.BulkCompleteBookingRequest;
 import com.driveease.dto.CompleteBookingRequest;
 import com.driveease.service.BookingService;
 import jakarta.validation.Valid;
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "http://localhost:5173")
 public class BookingController {
 
     private final BookingService bookingService;
@@ -45,5 +45,11 @@ public class BookingController {
         @PathVariable Long id,
         @Valid @RequestBody CompleteBookingRequest request ) {
         return bookingService.completeBooking(id, request);
+    }
+
+    @PutMapping("/complete-bulk")
+    public List<BookingResponse> completeBookingsBulk(
+        @Valid @RequestBody BulkCompleteBookingRequest request) {
+        return bookingService.completeBookingsBulk(request);
     }
 }

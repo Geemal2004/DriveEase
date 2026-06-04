@@ -24,6 +24,11 @@ public class BookingVehicleResponse {
     private BigDecimal baseDailyRate;
     private BigDecimal finalDailyRate;
     private BigDecimal lineTotal;
+    private Integer allowedMileage;
+    private Integer actualMileage;
+    private Integer extraMileage;
+    private BigDecimal extraMileageRate;
+    private BigDecimal extraMileageCharge;
 
     public static BookingVehicleResponse fromEntity(BookingVehicle bookingVehicle) {
         return BookingVehicleResponse.builder()
@@ -36,6 +41,11 @@ public class BookingVehicleResponse {
                 .baseDailyRate(bookingVehicle.getBaseDailyRate())
                 .finalDailyRate(bookingVehicle.getFinalDailyRate())
                 .lineTotal(bookingVehicle.getLineTotal())
+                .allowedMileage(bookingVehicle.getAllowedMileage())
+                .actualMileage(bookingVehicle.getActualMileage())
+                .extraMileage(bookingVehicle.getExtraMileage())
+                .extraMileageRate(bookingVehicle.getExtraMileageRate())
+                .extraMileageCharge(bookingVehicle.getExtraMileageCharge())
                 .driverId(
                     bookingVehicle.getDriver() != null
                     ? bookingVehicle.getDriver().getDriverId()

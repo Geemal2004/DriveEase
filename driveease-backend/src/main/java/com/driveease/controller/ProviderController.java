@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/providers")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ProviderController {
 
     private final ProviderService providerService;
