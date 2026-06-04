@@ -1,8 +1,8 @@
-name: Sync to Hugging Face
+name: Sync Backend to Hugging Face
 
 on:
   push:
-    branches: [ main ] # Change to your default branch if it's not main
+    branches: [ main ]
 
 jobs:
   sync-to-hub:
@@ -14,12 +14,17 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Push to Hugging Face
+      - name: Push Subdirectory to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Use huggingface-cli or git push directly via token
-          git remote add hf https://YOUR_HF_USERNAME:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/geemal204/driveease
-          # Note: Change 'spaces' to 'models' or 'datasets' depending on your repo type
-          
-          git push --force hf main
+          # 1. Configure a temporary git identity for the push
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+          # 2. Add the Hugging Face remote
+          git remote add hf https://geemal204:$HF_TOKEN@huggingface.co/spaces/geemal204/driveease
+
+          # 3. Isolate and push ONLY the backend directory
+          # This extracts the history of 'driveease-backend' and pushes it as the root of HF's main branch
+          git subtree push --prefix driveease-backend hf main
