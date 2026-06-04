@@ -863,6 +863,37 @@ p {
     color: #111827;
   }
 
+
+  .vehicle-thumb {
+  width: 70px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.small-input {
+  width: 110px;
+  padding: 7px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.booking-vehicle-box {
+  background-color: #f9fafb;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.return-mileage-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
   .print-report-header h2 {
     margin-bottom: 8px;
     font-size: 18px;

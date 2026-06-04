@@ -12,6 +12,7 @@ import Bookings from "../pages/Bookings";
 import Login from "../pages/Login";
 import RegisterUser from "../pages/RegisterUser";
 import Drivers from "../pages/Drivers";
+import ServiceLogs from "../pages/ServiceLogs";
 
 function AppRoutes() {
   return (
@@ -48,6 +49,7 @@ function AppRoutes() {
                   <Route path="/providers" element={<Providers />} />
                   <Route path="/contracts" element={<Contracts />} />
                   <Route path="/drivers" element={<Drivers/>} />
+                  <Route path="/service-logs" element={<ServiceLogs />} />
                 </Route>
                 
                 {/* Admin Only Route */}
