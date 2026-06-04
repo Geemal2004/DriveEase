@@ -1,0 +1,25 @@
+name: Sync to Hugging Face
+
+on:
+  push:
+    branches: [ main ] # Change to your default branch if it's not main
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Use huggingface-cli or git push directly via token
+          git remote add hf https://YOUR_HF_USERNAME:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/geemal204/driveease
+          # Note: Change 'spaces' to 'models' or 'datasets' depending on your repo type
+          
+          git push --force hf main
